@@ -41,19 +41,37 @@ let state = {
 
 const logic = {
     async loadAll() {
+    try {
+        const res = await Promise.all([
+            supabase.from('trips').select('data').eq('trip_id', CONFIG.TRIP_ID).maybeSingle(),
+            supabase.from('trips').select('data').eq('trip_id', CONFIG.EXPENSE_ID).maybeSingle(),
+            supabase.from('trips').select('data').eq('trip_id', CONFIG.TICKET_ID).maybeSingle()
+        ]);
+
+        state.itinerary = res[0].data?.data || {};
+        state.expenses = Array.isArray(res[1].data?.data) ? res[1].data.data : [];
+        state.tickets = Array.isArray(res[2].data?.data) ? res[2].data.data : [];
+
+        ui.renderAll();
+    } catch (e) {
+        console.error('loadAll failed:', e);
+
+        state.itinerary = state.itinerary || {};
+        state.expenses = state.expenses || [];
+        state.tickets = state.tickets || [];
+
         try {
-            const res = await Promise.all([
-                supabase.from('trips').select('data').eq('trip_id', CONFIG.TRIP_ID).maybeSingle(),
-                supabase.from('trips').select('data').eq('trip_id', CONFIG.EXPENSE_ID).maybeSingle(),
-                supabase.from('trips').select('data').eq('trip_id', CONFIG.TICKET_ID).maybeSingle()
-            ]);
-            state.itinerary = res[0].data?.data || {};
-            state.expenses = Array.isArray(res[1].data?.data) ? res[1].data.data : [];
-            state.tickets = Array.isArray(res[2].data?.data) ? res[2].data.data : [];
-            ui.renderAll(); 
-            document.getElementById('loading-screen').style.display = 'none';
-        } catch(e) { console.error(e); }
-    },
+            ui.renderAll();
+        } catch (renderErr) {
+            console.error('render failed:', renderErr);
+        }
+
+        alert('資料載入失敗，先以空白資料開啟。你之後可以再檢查 Supabase 設定。');
+    } finally {
+        const loading = document.getElementById('loading-screen');
+        if (loading) loading.style.display = 'none';
+    }
+},
     async saveExpenses() {
         ui.showStatus("Saving...", 0);
         await supabase.from('trips').upsert({ trip_id: CONFIG.EXPENSE_ID, data: state.expenses, updated_at: new Date().toISOString() }, { onConflict: 'trip_id' });
@@ -131,4 +149,5 @@ window.onload = () => {
         const header = document.getElementById('main-header');
         if (header) { if (window.scrollY > 50) header.classList.add('header-scrolled'); else header.classList.remove('header-scrolled'); }
     });
+
 };
