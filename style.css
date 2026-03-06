@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
+    /* iOS 規範配色與深度感變數 */
     --ios-blue: #007AFF;
     --ios-bg: #F2F2F7;
     --card-shadow: 0 4px 20px rgba(0,0,0,0.05);
@@ -9,255 +10,460 @@
     --max-content-width: 650px;
 }
 
-/* 基礎設定 */
-body {
-    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-    background: var(--ios-bg);
-    color: #1c1c1e;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-    width: 100vw;
-    margin: 0;
-    padding: 0;
+/* 基礎重設與安全區域處理 */
+body { 
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; 
+    background: var(--ios-bg); 
+    color: #1c1c1e; 
+    -webkit-font-smoothing: antialiased; 
+    overflow-x: hidden; 
+    width: 100vw; 
+    margin: 0; 
+    padding: 0; 
 }
 
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
+.no-scrollbar::-webkit-scrollbar { 
+    display: none; 
 }
 
-.content-container {
-    width: 100%;
-    max-width: var(--max-content-width);
-    margin: 0 auto;
+.content-container { 
+    width: 100%; 
+    max-width: var(--max-content-width); 
+    margin: 0 auto; 
 }
 
-/* --- 釘在最上方的 Banner (避開系統狀態列) --- */
-.glass-header {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: var(--header-blur);
+/* --- 頂部 Banner (釘在最上方 & 避開系統狀態列) --- */
+.glass-header { 
+    background: rgba(255, 255, 255, 0.9); 
+    backdrop-filter: var(--header-blur); 
     -webkit-backdrop-filter: var(--header-blur);
-    position: fixed; /* 固定在頂部 */
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 2000;
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    z-index: 2000; 
     border-bottom: 0.5px solid rgba(0,0,0,0.06);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
     will-change: height, transform;
-    /* 核心：預留手機頂部狀態列（瀏海/動態島）空間 */
+    /* 確保文字不會和系統狀態列重疊 */
     padding-top: env(safe-area-inset-top, 20px);
 }
 
-.header-main-row {
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    transition: all 0.3s ease;
-    overflow: hidden;
+.header-main-row { 
+    height: 64px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 0 20px; 
+    transition: all 0.3s ease; 
+    overflow: hidden; 
 }
 
-/* 滾動時標題收合 */
-.header-scrolled .header-main-row {
-    height: 0;
-    opacity: 0;
-    pointer-events: none;
+/* 滾動時標題收合邏輯 */
+.header-scrolled .header-main-row { 
+    height: 0; 
+    opacity: 0; 
+    pointer-events: none; 
 }
 
-/* --- 日期選擇器 --- */
-.date-picker-scroll {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding: 0 20px 16px 20px;
-    scroll-behavior: smooth;
-    transition: all 0.3s ease;
+/* 日期選擇器滾動區 */
+.date-picker-scroll { 
+    display: flex; 
+    gap: 12px; 
+    overflow-x: auto; 
+    padding: 0 20px 16px 20px; 
+    scroll-behavior: smooth; 
+    transition: all 0.3s ease; 
 }
 
-.date-card-new {
-    min-width: 65px;
-    height: 85px;
-    border-radius: 18px;
+.date-card-new { 
+    min-width: 65px; 
+    height: 85px; 
+    border-radius: 18px; 
     background: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
     justify-content: center;
-    border: 1px solid rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.02); 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
+    cursor: pointer; 
     flex-shrink: 0;
 }
 
-.date-card-new.active {
-    background: var(--ios-blue);
-    color: white;
-    box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3);
-    border-color: transparent;
-    transform: scale(1.02);
+.date-card-new.active { 
+    background: var(--ios-blue); 
+    color: white; 
+    box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3); 
+    border-color: transparent; 
 }
 
-.header-scrolled .date-picker-scroll {
-    padding: 10px 20px;
+.date-card-new .day-label { 
+    font-size: 9px; 
+    font-weight: 800; 
+    opacity: 0.6; 
+    text-transform: uppercase; 
+    margin-bottom: 4px; 
 }
 
-.header-scrolled .date-card-new {
-    height: 45px;
-    min-width: 55px;
-    border-radius: 12px;
+.date-card-new.active .day-label { 
+    opacity: 1; 
 }
 
-.header-scrolled .day-label, .header-scrolled .week-label {
-    display: none;
+.date-card-new .week-label { 
+    font-size: 11px; 
+    font-weight: 700; 
+    margin-bottom: 2px; 
 }
 
-/* --- 主內容補償 Padding (防止內容被 Fixed Header 擋住) --- */
+.date-card-new .date-val { 
+    font-size: 17px; 
+    font-weight: 800; 
+}
+
+/* 縮小態樣式：僅保留 4/3 格式 */
+.header-scrolled .date-picker-scroll { 
+    padding: 10px 20px; 
+}
+
+.header-scrolled .date-card-new { 
+    height: 45px; 
+    min-width: 55px; 
+    border-radius: 12px; 
+}
+
+.header-scrolled .day-label, 
+.header-scrolled .week-label { 
+    display: none; 
+}
+
+.header-scrolled .date-val { 
+    font-size: 14px; 
+}
+
+/* --- 主內容補償區 --- */
 .view-section {
-    /* 165px 是 Header 展開時的大約高度，加上系統狀態列高度 */
-    padding-top: calc(165px + env(safe-area-inset-top, 20px));
-    /* 100px 是底部導覽列高度 */
     padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px));
     min-height: 100vh;
 }
 
-/* --- 行程時間軸與跑版修復 --- */
-.iti-item-row {
-    display: flex;
-    gap: 16px;
-    position: relative;
-    margin-bottom: 12px;
-    width: 100%;
-    align-items: flex-start;
+/* 行程頁面：padding-top 補償 Header 與日期區 (較大) */
+#view-itinerary {
+    padding-top: calc(185px + env(safe-area-inset-top, 20px));
 }
 
-.iti-timeline-col {
-    width: 34px;
+/* 分帳與票券：padding-top 縮小補償 (較小) */
+#view-expenses, #view-tickets {
+    padding-top: calc(85px + env(safe-area-inset-top, 20px));
+}
+
+/* --- 行程時間軸對齊修正 --- */
+.iti-item-row { 
+    display: flex; 
+    gap: 16px; 
+    position: relative; 
+    margin-bottom: 12px; 
+    width: 100%; 
+    align-items: flex-start; 
+}
+
+.iti-timeline-col { 
+    width: 34px; 
+    flex-shrink: 0; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    position: relative; 
+}
+
+.iti-line-dashed { 
+    position: absolute; 
+    left: 50%; 
+    top: 34px; 
+    bottom: -12px; 
+    width: 0; 
+    border-left: 2px dashed #D1D1D6; 
+    transform: translateX(-50%); 
+    z-index: 0; 
+}
+
+.iti-icon-box { 
+    width: 34px; 
+    height: 34px; 
+    background: var(--ios-blue); 
+    color: white; 
+    border-radius: 10px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    position: relative; 
+    z-index: 10; 
+    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2); 
     flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
 }
 
-.iti-line-dashed {
-    position: absolute;
-    left: 50%;
-    top: 34px;
-    bottom: -12px;
-    width: 0;
-    border-left: 2px dashed #D1D1D6;
-    transform: translateX(-50%);
-    z-index: 0;
+.iti-content-col { 
+    flex: 1; 
+    min-width: 0; 
+    padding-bottom: 12px; 
 }
 
-.iti-icon-box {
-    width: 34px;
-    height: 34px;
-    background: var(--ios-blue);
-    color: white;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 10;
-    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2);
-    flex-shrink: 0;
+.iti-main-item-card { 
+    background: white; 
+    border-radius: 22px; 
+    padding: 18px; 
+    box-shadow: var(--card-shadow); 
+    border: 1px solid rgba(0,0,0,0.01); 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    gap: 12px; 
+    width: 100%; 
 }
 
-.iti-content-col {
-    flex: 1;
-    min-width: 0;
+.iti-sub-item-card { 
+    background: #F8F9FA; 
+    border-radius: 16px; 
+    padding: 12px 16px; 
+    margin-top: 2px; 
+    color: #48484A; 
+    font-size: 12px; 
+    font-weight: 500; 
+    white-space: pre-wrap; 
+    line-height: 1.5; 
+    border: 1px solid rgba(0, 0, 0, 0.02); 
+    width: 100%; 
+    text-align: left;
 }
 
-.iti-main-item-card {
-    background: white;
-    border-radius: 22px;
-    padding: 18px;
-    box-shadow: var(--card-shadow);
-    border: 1px solid rgba(0,0,0,0.01);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
+/* 交通卡片 */
+.iti-transfer-card { 
+    background: #F0F2F5; 
+    border-radius: 20px; 
+    padding: 10px 14px; 
+    margin: 6px 0 14px 48px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 10px; 
+    border: 1px solid rgba(0,0,0,0.02); 
 }
 
-/* --- 釘在底部的 Nav Bar (避開系統手勢條) --- */
-.glass-nav {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: var(--header-blur);
+/* --- 攻略步驟 UI --- */
+.strat-step-item { 
+    display: flex; 
+    gap: 14px; 
+    background: white; 
+    border-radius: 20px; 
+    padding: 16px; 
+    margin-bottom: 12px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+    border: 1px solid rgba(0,0,0,0.01); 
+}
+
+.strat-step-num { 
+    width: 28px; 
+    height: 28px; 
+    background: var(--ios-blue); 
+    color: white; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 13px; 
+    font-weight: 800; 
+    flex-shrink: 0; 
+}
+
+.strat-step-content { 
+    flex: 1; 
+    min-width: 0; 
+    text-align: left; 
+}
+
+.strat-step-title { 
+    font-size: 14px; 
+    font-weight: 800; 
+    color: #1c1c1e; 
+    margin-bottom: 4px; 
+}
+
+.strat-step-detail { 
+    font-size: 13px; 
+    color: #636366; 
+    line-height: 1.6; 
+}
+
+/* --- 底部導覽列 (釘在最下面) --- */
+.glass-nav { 
+    background: rgba(255, 255, 255, 0.85); 
+    backdrop-filter: var(--header-blur); 
     -webkit-backdrop-filter: var(--header-blur);
-    border-top: 0.5px solid rgba(0,0,0,0.08);
-    position: fixed; /* 固定在底部 */
-    bottom: 0;
-    left: 0;
-    right: 0;
+    border-top: 0.5px solid rgba(0,0,0,0.08); 
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    right: 0; 
     z-index: 2500;
-    /* 核心：預留手機底部操作條空間 */
+    /* 確保圖示不被 iPhone 底部手勢小白條遮擋 */
     padding-bottom: env(safe-area-inset-bottom, 12px);
 }
 
-.nav-card {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 12px 0;
-    color: #8E8E93;
-    cursor: pointer;
+.nav-card { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 4px; 
+    padding: 12px 0; 
+    color: #8E8E93; 
+    cursor: pointer; 
+    transition: 0.2s; 
 }
 
-.nav-card.active {
-    color: var(--ios-blue);
-}
-
-/* --- 彈窗系統 --- */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index: 3000;
-    display: none;
-    opacity: 0;
-    transition: 0.3s;
-    align-items: flex-end;
-    justify-content: center;
-}
-
-.modal-box {
-    background: white;
-    border-radius: 30px 30px 0 0;
-    width: 100%;
-    max-height: 94vh;
-    display: flex;
-    flex-direction: column;
-    transform: translateY(100%);
-    transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-    overflow: hidden;
-    /* 彈窗底部同樣避開手勢條 */
-    padding-bottom: env(safe-area-inset-bottom);
+.nav-card.active { 
+    color: var(--ios-blue); 
 }
 
 /* --- 懸浮按鈕 (FAB) --- */
-.fab-button {
-    position: fixed;
-    /* 考慮 Nav Bar 高度與安全區域後的定位 */
-    bottom: calc(90px + env(safe-area-inset-bottom, 12px));
-    right: 24px;
-    width: 56px;
-    height: 56px;
-    background: var(--ios-blue);
-    color: white;
-    border-radius: 28px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3);
-    z-index: 2400;
+.fab-button { 
+    position: fixed; 
+    /* 考慮底部導覽列高度與安全區高度的補償 */
+    bottom: calc(90px + env(safe-area-inset-bottom, 12px)); 
+    right: 24px; 
+    width: 56px; 
+    height: 56px; 
+    background: var(--ios-blue); 
+    color: white; 
+    border-radius: 28px; 
+    display: none; 
+    align-items: center; 
+    justify-content: center; 
+    box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3); 
+    z-index: 2400; 
+}
+
+/* --- 彈窗系統樣式 --- */
+.modal-overlay { 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(0,0,0,0.5); 
+    backdrop-filter: blur(10px); 
+    -webkit-backdrop-filter: blur(10px); 
+    z-index: 3000; 
+    display: none; 
+    opacity: 0; 
+    transition: 0.3s; 
+    align-items: flex-end; 
+    justify-content: center; 
+}
+
+.modal-overlay.show { 
+    display: flex; 
+    opacity: 1; 
+}
+
+.modal-box { 
+    background: white; 
+    border-radius: 30px 30px 0 0; 
+    width: 100%; 
+    max-height: 94vh; 
+    display: flex; 
+    flex-direction: column; 
+    transform: translateY(100%); 
+    transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); 
+    overflow: hidden; 
+    padding-bottom: env(safe-area-inset-bottom); 
+}
+
+.modal-overlay.show .modal-box { 
+    transform: translateY(0); 
+}
+
+/* --- 圖片上傳區域 --- */
+.image-upload-box { 
+    width: 100%; 
+    height: 180px; 
+    background: #F2F2F7; 
+    border-radius: 20px; 
+    border: 2px dashed #D1D1D6; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    color: #8E8E93; 
+    position: relative; 
+    overflow: hidden; 
+    margin-bottom: 12px; 
+    cursor: pointer; 
+}
+
+.image-upload-box.uploading { 
+    opacity: 0.5; 
+    cursor: wait; 
+}
+
+.remove-img-btn { 
+    position: absolute; 
+    top: 10px; 
+    right: 10px; 
+    z-index: 50; 
+    width: 28px; 
+    height: 28px; 
+    background: rgba(0,0,0,0.6); 
+    color: white; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+/* --- 分帳數據卡片 --- */
+.settlement-card-focus { 
+    background: white; 
+    border: 1px solid rgba(0,0,0,0.05); 
+    border-radius: 24px; 
+    padding: 18px 20px; 
+    min-width: 185px; 
+    box-shadow: 0 8px 24px rgba(0,0,0,0.04); 
+    flex-shrink: 0; 
+    text-align: left;
+}
+
+.expense-card-compact { 
+    background: white; 
+    border-radius: 18px; 
+    padding: 14px; 
+    border: 1px solid rgba(0,0,0,0.01); 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin-bottom: 8px; 
+    width: 100%; 
+}
+
+.personal-item-card { 
+    background: white; 
+    border-radius: 16px; 
+    padding: 14px; 
+    margin-bottom: 8px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    border: 1px solid rgba(0,0,0,0.02); 
+    width: 100%; 
+    text-align: left;
+}
+
+.input-pill { 
+    width: 100%; 
+    padding: 14px 20px; 
+    border-radius: 16px; 
+    background: #F2F2F7; 
+    border: 1px solid transparent; 
+    font-size: 14px; 
+    font-weight: 600; 
+    outline: none; 
+    margin-bottom: 12px; 
 }
 
