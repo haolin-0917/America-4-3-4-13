@@ -373,3 +373,11 @@ body {
     border-color: var(--ios-blue); 
     background: white; 
 }
+/* 隱藏 input file 原生按鈕與文字 */
+input[type="file"] {
+    color: transparent;
+}
+
+input[type="file"]::file-selector-button {
+    display: none;
+}
