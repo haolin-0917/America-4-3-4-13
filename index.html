@@ -11,19 +11,29 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
         :root {
             --ios-blue: #007AFF; --ios-bg: #F2F2F7; --card-shadow: 0 4px 20px rgba(0,0,0,0.05);
             --header-blur: saturate(180%) blur(25px); --max-content-width: 650px;
         }
-        body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: var(--ios-bg); color: #1c1c1e; -webkit-font-smoothing: antialiased; overflow-x: hidden; width: 100vw; margin: 0; padding: 0; }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; 
+            background: var(--ios-bg); color: #1c1c1e; 
+            -webkit-font-smoothing: antialiased; 
+            overflow-x: hidden; width: 100vw; margin: 0; padding: 0;
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .content-container { width: 100%; max-width: var(--max-content-width); margin: 0 auto; }
 
-        /* 固定 Header 系統：避開狀態列 */
+        /* --- 固定 Header (避開狀態列) --- */
         .glass-header { 
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: var(--header-blur); -webkit-backdrop-filter: var(--header-blur);
-            position: fixed; top: 0; left: 0; right: 0; z-index: 2000; border-bottom: 0.5px solid rgba(0,0,0,0.06);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); will-change: height, transform;
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: var(--header-blur); -webkit-backdrop-filter: var(--header-blur);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
+            border-bottom: 0.5px solid rgba(0,0,0,0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding-top: env(safe-area-inset-top, 20px);
         }
         .header-main-row { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; transition: all 0.3s ease; overflow: hidden; }
@@ -43,65 +53,93 @@
         .date-card-new .week-label { font-size: 11px; font-weight: 700; margin-bottom: 2px; }
         .date-card-new .date-val { font-size: 17px; font-weight: 800; }
 
+        /* 滾動縮小樣式 */
         .header-scrolled .date-picker-scroll { padding: 10px 20px; }
         .header-scrolled .date-card-new { height: 45px; min-width: 55px; border-radius: 12px; }
         .header-scrolled .day-label, .header-scrolled .week-label { display: none; }
         .header-scrolled .date-val { font-size: 14px; }
 
-        /* 主內容補償區：避免被 Header 遮擋 */
+        /* --- 內容區補償 --- */
         .view-section {
-            padding-top: calc(160px + env(safe-area-inset-top, 20px));
+            padding-top: calc(165px + env(safe-area-inset-top, 20px));
             padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px));
             min-height: 100vh;
         }
-        .header-scrolled + .view-section, 
-        #view-itinerary.header-scrolled-padding {
-            /* 當 Header 縮小時，不需要那麼多 padding，但為了平滑，我們可以用 padding 轉場或在 JS 處理 */
-        }
 
-        /* 行程時間軸佈局 */
-        .iti-item-row { display: flex; gap: 16px; position: relative; margin-bottom: 12px; width: 100%; }
-        .iti-timeline-col { width: 34px; flex-shrink: 0; position: relative; display: flex; flex-direction: column; align-items: center; }
-        .iti-line-dashed { position: absolute; left: 50%; top: 34px; bottom: -12px; width: 0; border-left: 2px dashed #D1D1D6; transform: translateX(-50%); z-index: 0; }
+        /* --- 行程時間軸 (修復跑版) --- */
+        .iti-item-row { display: flex; gap: 16px; position: relative; margin-bottom: 12px; width: 100%; align-items: flex-start; }
+        .iti-timeline-col { width: 34px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .iti-line-dashed { 
+            position: absolute; left: 50%; top: 34px; bottom: -12px; 
+            width: 0; border-left: 2px dashed #D1D1D6; transform: translateX(-50%); z-index: 0; 
+        }
         .iti-icon-box { 
             width: 34px; height: 34px; background: var(--ios-blue); color: white; 
             border-radius: 10px; display: flex; align-items: center; justify-content: center; 
             position: relative; z-index: 10; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2); flex-shrink: 0;
         }
-        .iti-content-col { flex: 1; min-width: 0; padding-bottom: 12px; }
-        .iti-main-item-card { background: white; border-radius: 22px; padding: 18px; box-shadow: var(--card-shadow); border: 1px solid rgba(0,0,0,0.01); display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; }
-        .iti-sub-item-card { background: #F8F9FA; border-radius: 16px; padding: 12px 16px; margin-top: 2px; color: #48484A; font-size: 12px; font-weight: 500; white-space: pre-wrap; line-height: 1.5; border: 1px solid rgba(0, 0, 0, 0.02); width: 100%; }
+        .iti-content-col { flex: 1; min-width: 0; padding-bottom: 12px; display: flex; flex-direction: column; }
         
+        /* 卡片與備註 */
+        .iti-main-item-card { 
+            background: white; border-radius: 22px; padding: 18px; 
+            box-shadow: var(--card-shadow); border: 1px solid rgba(0,0,0,0.01); 
+            display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; 
+        }
+        .iti-sub-item-card { 
+            background: #F8F9FA; border-radius: 16px; padding: 12px 16px; margin-top: 2px; 
+            color: #48484A; font-size: 12px; font-weight: 500; white-space: pre-wrap; 
+            line-height: 1.5; border: 1px solid rgba(0, 0, 0, 0.02); width: 100%;
+        }
+        
+        .iti-transfer-card { 
+            background: #F0F2F5; border-radius: 20px; padding: 10px 14px; margin: 6px 0 14px 48px; 
+            display: flex; align-items: center; justify-content: space-between; gap: 10px; 
+            border: 1px solid rgba(0,0,0,0.02); 
+        }
+        .iti-transfer-card.clickable { cursor: pointer; }
+        .nav-action-btn { width: 36px; height: 36px; background: var(--ios-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2); flex-shrink: 0; z-index: 20; }
+
         /* 攻略樣式 */
         .strat-step-item { display: flex; gap: 14px; background: white; border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.01); }
         .strat-step-num { width: 28px; height: 28px; background: var(--ios-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; }
-        .strat-step-content { flex: 1; min-width: 0; }
+        .strat-step-content { flex: 1; min-width: 0; text-align: left; }
         .strat-step-title { font-size: 14px; font-weight: 800; color: #1c1c1e; margin-bottom: 4px; }
         .strat-step-detail { font-size: 13px; color: #636366; line-height: 1.6; }
 
-        /* 固定導覽列：避開 Home Indicator */
+        /* 固定導覽列 */
         .glass-nav { 
             background: rgba(255, 255, 255, 0.85); backdrop-filter: var(--header-blur); -webkit-backdrop-filter: var(--header-blur);
-            border-top: 0.5px solid rgba(0,0,0,0.08); position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500;
+            border-top: 0.5px solid rgba(0,0,0,0.08); position: fixed; bottom: 0; left: 0; right: 0; z-index: 2500;
             padding-bottom: env(safe-area-inset-bottom, 12px);
         }
         .nav-card { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 0; color: #8E8E93; cursor: pointer; }
         .nav-card.active { color: var(--ios-blue); }
 
-        /* 彈窗與 FAB */
+        /* 彈窗系統 */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 3000; display: none; opacity: 0; transition: 0.3s; align-items: flex-end; justify-content: center; }
         .modal-overlay.show { display: flex; opacity: 1; }
         .modal-box { background: white; border-radius: 30px 30px 0 0; width: 100%; max-height: 94vh; display: flex; flex-direction: column; transform: translateY(100%); transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); overflow: hidden; padding-bottom: env(safe-area-inset-bottom); }
         .modal-overlay.show .modal-box { transform: translateY(0); }
+        .modal-header-fixed { padding: 18px 20px; background: white; border-bottom: 0.5px solid rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; position: relative; }
+        .modal-content-scroll { flex: 1; overflow-y: auto; padding: 20px; }
+        .modal-footer-fixed { padding: 16px 24px; background: white; border-top: 0.5px solid rgba(0,0,0,0.06); padding-bottom: calc(16px + env(safe-area-inset-bottom)); flex-shrink: 0; }
+
+        /* FAB 按鈕 */
+        .fab-button { position: fixed; bottom: calc(90px + env(safe-area-inset-bottom, 12px)); right: 24px; width: 56px; height: 56px; background: var(--ios-blue); color: white; border-radius: 28px; display: none; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3); z-index: 2400; }
         
-        .fab-button { position: fixed; bottom: calc(90px + env(safe-area-inset-bottom, 12px)); right: 24px; width: 56px; height: 56px; background: var(--ios-blue); color: white; border-radius: 28px; display: none; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3); z-index: 1400; }
-        
+        .delete-btn-text { width: 100%; padding: 12px; color: #FF3B30; font-weight: 700; font-size: 14px; text-align: center; cursor: pointer; transition: 0.2s; display: none; }
+        .image-upload-box { width: 100%; height: 180px; background: #F2F2F7; border-radius: 20px; border: 2px dashed #D1D1D6; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8E8E93; position: relative; overflow: hidden; margin-bottom: 12px; cursor: pointer; }
+        .image-upload-box.uploading { opacity: 0.5; cursor: wait; }
+        .image-upload-box img { width: 100%; height: 100%; object-fit: cover; }
+        .remove-img-btn { position: absolute; top: 10px; right: 10px; z-index: 50; width: 28px; height: 28px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        /* 分帳與個人分析 */
         .settlement-card-focus { background: white; border: 1px solid rgba(0,0,0,0.05); border-radius: 24px; padding: 18px 20px; min-width: 185px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); flex-shrink: 0; }
         .expense-card-compact { background: white; border-radius: 18px; padding: 14px; border: 1px solid rgba(0,0,0,0.01); display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; width: 100%; }
         .personal-item-card { background: white; border-radius: 16px; padding: 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(0,0,0,0.02); width: 100%; }
         .personal-item-share { font-size: 11px; font-weight: 800; color: var(--ios-blue); background: rgba(0, 122, 255, 0.08); padding: 2px 8px; border-radius: 8px; }
-        .image-upload-box { width: 100%; height: 180px; background: #F2F2F7; border-radius: 20px; border: 2px dashed #D1D1D6; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8E8E93; position: relative; overflow: hidden; margin-bottom: 12px; cursor: pointer; }
-        .delete-btn-text { width: 100%; padding: 12px; color: #FF3B30; font-weight: 700; font-size: 14px; text-align: center; cursor: pointer; transition: 0.2s; display: none; }
+        .metric-value { font-size: 20px; font-weight: 800; color: #1c1c1e; line-height: 1.1; }
         .input-pill { width: 100%; padding: 14px 20px; border-radius: 16px; background: #F2F2F7; border: 1px solid transparent; font-size: 14px; font-weight: 600; outline: none; margin-bottom: 12px; }
         .input-pill:focus { border-color: var(--ios-blue); background: white; }
     </style>
@@ -118,7 +156,7 @@
     <!-- Modals -->
     <div id="guide-modal" class="modal-overlay" onclick="ui.closeModal('guide-modal')">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header-fixed"><button onclick="ui.closeModal('guide-modal')" class="text-slate-400"><i data-lucide="x"></i></button><h3 class="text-sm font-black text-slate-900">攻略詳細內容</h3><div class="w-8"></div></div>
+            <div class="modal-header-fixed"><button onclick="ui.closeModal('guide-modal')" class="text-slate-400 p-1 active:scale-90 transition-all"><i data-lucide="x"></i></button><h3 class="text-sm font-black text-slate-900">攻略詳細內容</h3><div class="w-8"></div></div>
             <div id="guide-modal-content" class="modal-content-scroll bg-[#F2F2F7]/50"></div>
         </div>
     </div>
@@ -127,9 +165,9 @@
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header-fixed"><button onclick="ui.closeModal('personal-stats-modal')" class="text-slate-400"><i data-lucide="x"></i></button><h3 class="text-sm font-black text-slate-900">個人分析詳情</h3><div class="w-8"></div></div>
             <div class="modal-content-scroll bg-[#F2F2F7]/50">
-                <div class="text-center bg-white p-6 rounded-3xl shadow-sm">
+                <div class="analyze-header-section text-center bg-white p-6 rounded-3xl shadow-sm">
                     <div id="stat-totals-container"></div>
-                    <div style="max-width: 150px; margin: 20px auto 0 auto;"><canvas id="personal-chart"></canvas></div>
+                    <div class="chart-container" style="max-width: 150px; margin: 20px auto 0 auto;"><canvas id="personal-chart"></canvas></div>
                 </div>
                 <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-6 mb-4 px-1">個人消費明細</h4>
                 <div id="personal-item-list" class="pb-10"></div>
@@ -139,12 +177,12 @@
 
     <div id="ticket-detail-modal" class="modal-overlay" onclick="ui.closeModal('ticket-detail-modal')">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header-fixed"><button onclick="ui.closeModal('ticket-detail-modal')" class="text-slate-400"><i data-lucide="x"></i></button><h3 class="text-sm font-black text-slate-900">票券圖片預覽</h3><div class="w-8"></div></div>
+            <div class="modal-header-fixed"><button onclick="ui.closeModal('ticket-detail-modal')" class="text-slate-400"><i data-lucide="x"></i></button><h3 id="td-title" class="text-sm font-black text-slate-900">票券圖片預覽</h3><div class="w-8"></div></div>
             <div class="modal-content-scroll">
                 <div id="td-container" class="space-y-6">
                     <div id="td-image-area" class="hidden"><img id="td-image" class="w-full rounded-2xl shadow-lg border border-slate-100" src="" loading="lazy"></div>
                     <div><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">備註</label><p id="td-note" class="text-slate-800 text-sm mt-2 white-space-pre-wrap"></p></div>
-                    <div id="td-attach-box" class="hidden"><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">連結</label><a id="td-link" href="#" target="_blank" class="block bg-blue-50 p-4 rounded-xl text-blue-600 font-bold text-xs mt-2 truncate">查看連結</a></div>
+                    <div id="td-attach-box" class="hidden"><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">連結</label><a id="td-link" href="#" target="_blank" class="block bg-blue-50 p-4 rounded-xl text-blue-600 font-bold text-xs mt-2 truncate">查看票券連結</a></div>
                 </div>
             </div>
         </div>
@@ -157,7 +195,7 @@
                 <div class="space-y-4">
                     <div class="image-upload-box" id="tk-image-box">
                         <i data-lucide="paperclip" class="w-8 h-8 mb-2"></i>
-                        <span class="text-xs font-bold" id="upload-status-text">上傳附件</span>
+                        <span class="text-xs font-bold" id="upload-status-text">上傳票券附件</span>
                         <input type="file" id="tk-image-input" accept="image/*" onchange="ui.handleTicketImage(event)">
                         <img id="tk-image-render" class="hidden absolute inset-0 w-full h-full object-cover" src="">
                         <div id="tk-remove-img" class="hidden remove-img-btn" onclick="ui.clearTicketImage(event)"><i data-lucide="trash-2" class="w-4 h-4"></i></div>
@@ -167,13 +205,13 @@
                     <input type="text" id="tk-attachment" class="input-pill" placeholder="連結 (選填)">
                 </div>
             </div>
-            <div class="modal-footer-fixed"><div id="delete-tk-btn" onclick="logic.deleteTicket()" class="delete-btn-text">刪除</div><button onclick="logic.submitTicket()" class="w-full py-4 rounded-2xl bg-blue-600 text-white font-black shadow-xl active:scale-95 text-sm uppercase transition-all">儲存</button></div>
+            <div class="modal-footer-fixed"><div id="delete-tk-btn" onclick="logic.deleteTicket()" class="delete-btn-text">刪除</div><button id="save-tk-btn" onclick="logic.submitTicket()" class="w-full py-4 rounded-2xl bg-blue-600 text-white font-black shadow-xl active:scale-95 text-sm uppercase transition-all">儲存票券</button></div>
         </div>
     </div>
 
     <div id="settlement-advice-modal" class="modal-overlay" onclick="ui.closeModal('settlement-advice-modal')">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header-fixed"><button onclick="ui.closeModal('settlement-advice-modal')" class="text-slate-400"><i data-lucide="x"></i></button><h3 class="text-sm font-black text-slate-900">結算建議</h3><div class="w-8"></div></div>
+            <div class="modal-header-fixed"><button onclick="ui.closeModal('settlement-advice-modal')" class="text-slate-400"><i data-lucide="x"></i></button><h3 class="text-sm font-black text-slate-900">美金結算建議</h3><div class="w-8"></div></div>
             <div class="modal-content-scroll bg-[#F2F2F7]/50" id="settlement-advice-content"></div>
         </div>
     </div>
@@ -187,7 +225,9 @@
             <div id="header-expenses" class="view-header hidden">
                 <div class="header-main-row">
                     <h1 class="text-[20px] font-black text-slate-900">分帳總覽 💸</h1>
-                    <button onclick="ui.showSettlementAdvice()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black shadow-lg active:scale-95 transition-all flex items-center gap-2"><i data-lucide="refresh-cw" class="w-3 h-3"></i> 結算建議</button>
+                    <button onclick="ui.showSettlementAdvice()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black shadow-lg active:scale-95 transition-all flex items-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> 結算建議
+                    </button>
                 </div>
             </div>
             <div id="header-tickets" class="view-header hidden">
@@ -196,15 +236,15 @@
         </header>
 
         <section id="view-itinerary" class="view-section">
-            <div class="content-container px-6 pb-32">
+            <div class="content-container px-6">
                 <div id="itinerary-list" class="space-y-0 relative"></div>
             </div>
         </section>
 
         <section id="view-expenses" class="view-section hidden">
-            <div class="content-container px-6 pb-32">
+            <div class="content-container px-6">
                 <div class="mb-10">
-                    <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 px-1">成員數據總覽</h3>
+                    <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 px-1 text-left">成員數據總覽</h3>
                     <div id="settlement-summary" class="flex gap-4 overflow-x-auto no-scrollbar pb-4"></div>
                 </div>
                 <div class="space-y-4">
@@ -212,13 +252,13 @@
                         <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><i data-lucide="list" class="w-3 h-3"></i> 支出明細</h3>
                         <span id="total-count" class="text-[10px] font-bold text-slate-300">0 項</span>
                     </div>
-                    <div id="expense-list" class="flex flex-col gap-1.5"></div>
+                    <div id="expense-list" class="flex flex-col gap-1.5 pb-20"></div>
                 </div>
             </div>
         </section>
 
         <section id="view-tickets" class="view-section hidden">
-            <div class="content-container px-6 pb-32"><div id="ticket-list" class="flex flex-col gap-3"></div></div>
+            <div class="content-container px-6"><div id="ticket-list" class="flex flex-col gap-3 pb-20"></div></div>
         </section>
 
         <footer class="glass-nav">
@@ -237,19 +277,28 @@
     <!-- 支出編輯彈窗 -->
     <div id="expense-modal" class="modal-overlay" onclick="ui.closeModal('expense-modal')">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header-fixed"><button onclick="ui.closeModal('expense-modal')" class="text-slate-400"><i data-lucide="x"></i></button><h3 class="text-sm font-black text-slate-900">支出紀錄</h3><div class="w-8"></div></div>
+            <div class="modal-header-fixed">
+                <button onclick="ui.closeModal('expense-modal')" class="text-slate-400"><i data-lucide="x"></i></button>
+                <h3 id="expense-modal-title" class="text-sm font-black text-slate-900">支出紀錄</h3><div class="w-8"></div>
+            </div>
             <div class="modal-content-scroll no-scrollbar">
                 <div class="space-y-4">
                     <input type="text" id="exp-title" class="input-pill" placeholder="項目名稱">
                     <select id="exp-category" class="input-pill"></select>
-                    <input type="number" id="exp-amount" class="input-pill" placeholder="金額 (USD)" inputmode="decimal">
+                    <div class="grid grid-cols-1 gap-4">
+                        <input type="number" id="exp-amount" class="input-pill" placeholder="金額 (USD)" inputmode="decimal">
+                        <input type="hidden" id="exp-currency" value="USD">
+                    </div>
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase">付款人</label><div id="payer-list"></div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase mt-4 block">分攤者</label><div id="part-list"></div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase text-left block">付款人</label><div id="payer-list" class="text-left"></div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase mt-4 text-left block">分攤者</label><div id="part-list" class="text-left"></div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer-fixed"><div id="delete-exp-btn" onclick="logic.deleteExpense()" class="delete-btn-text">刪除</div><button onclick="logic.submitExpense()" class="w-full py-4 rounded-2xl bg-blue-600 text-white font-black shadow-xl active:scale-95 text-sm transition-all">儲存</button></div>
+            <div class="modal-footer-fixed">
+                <div id="delete-exp-btn" onclick="logic.deleteExpense()" class="delete-btn-text">刪除</div>
+                <button onclick="logic.submitExpense()" class="w-full py-4 rounded-2xl bg-blue-600 text-white font-black shadow-xl active:scale-95 text-sm uppercase transition-all">儲存支出</button>
+            </div>
         </div>
     </div>
 
@@ -364,7 +413,7 @@
                         const isPrep = item.type === '準備'; const iconBoxStyle = isPrep ? 'style="background: #D1D1D6; box-shadow: none;"' : '';
                         return `<div class="iti-item-row"><div class="iti-timeline-col"><div class="iti-line-dashed"></div><div class="iti-icon-box" ${iconBoxStyle}><i data-lucide="${this.getIcon(item.type)}" class="w-4.5 h-4.5"></i></div></div><div class="iti-content-col"><div class="iti-main-item-card"><div class="min-w-0 flex-grow text-left"><h4 class="font-black text-[17px] text-slate-900 mb-1 truncate">${item.title || '未命名'}</h4><div class="flex items-center gap-2">${item.time ? `<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg text-[10px] font-black">${item.time}</span>` : ''}</div></div>${item.nav ? `<a href="${item.nav}" target="_blank" class="nav-action-btn shadow-lg"><i data-lucide="map" class="w-4 h-4"></i></a>` : ''}</div>${item.note ? `<div class="iti-sub-item-card">${item.note}</div>` : ''}</div></div>`;
                     }).join('');
-                } else html += `<div class="py-40 text-center text-slate-300 font-black opacity-40 text-xs uppercase">此日暫無行程</div>`;
+                } else html += `<div class="py-40 text-center text-slate-300 font-black opacity-40 text-xs uppercase">此日暫無行程紀錄</div>`;
                 list.innerHTML = html; lucide.createIcons();
             },
             showGuideModal(encodedData) {
@@ -382,7 +431,7 @@
                         <div class="flex items-center gap-3.5 min-w-0 text-left"><div style="width:36px; height:36px; border-radius:10px; background:#F4F7FF; color:#007AFF; display:flex; align-items:center; justify-content:center;"><i data-lucide="ticket" class="w-4.5 h-4.5"></i></div><div class="flex flex-col min-w-0"><h4 class="font-black text-slate-900 truncate text-sm">${t.title || '未命名'}</h4>${t.note ? `<p class="text-[10px] text-slate-400 truncate mt-0.5">${t.note}</p>` : ''}</div></div>
                         <div class="flex items-center gap-2">${t.image ? `<div onclick="event.stopPropagation(); ui.showTicketImagePopup(${t.id})" class="p-2 -m-2 text-blue-600"><i data-lucide="paperclip" class="w-4.5 h-4.5"></i></div>` : ''}${t.attachment ? `<i data-lucide="link" class="w-3.5 h-3.5 text-blue-400 opacity-60"></i>` : ''}<i data-lucide="chevron-right" class="w-4 h-4 text-slate-200"></i></div>
                     </div>
-                </div>`).join('') : `<div class="py-40 text-center text-slate-300 font-black opacity-30 text-xs tracking-widest uppercase">尚無票券</div>`;
+                </div>`).join('') : `<div class="py-40 text-center text-slate-300 font-black opacity-30 text-xs tracking-widest uppercase">尚無票券紀錄</div>`;
                 lucide.createIcons();
             },
             showTicketImagePopup(id) {
@@ -458,9 +507,9 @@
                 summary.innerHTML = CONFIG.MEMBERS.map(m => {
                     const twd = Math.round(total[m] * CONFIG.EXCHANGE_RATE);
                     const bVal = bal[m]; const color = bVal >= 0.05 ? 'text-green-500' : (bVal <= -0.05 ? 'text-slate-400' : 'text-slate-300');
-                    return `<div onclick="ui.openPersonalStats('${m}')" class="settlement-card-focus"><div class="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-2">${m}</div><div class="text-[22px] font-black text-slate-900 leading-none mb-1">NT$${twd.toLocaleString()}</div><div class="text-[9px] font-bold text-slate-400 mb-4">$${total[m].toFixed(1)} Spent</div><div class="pt-2.5 border-t border-slate-100"><div class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">USD Balance</div><div class="text-[11px] font-bold ${color} leading-none">${bVal>=0.05?'+':''}$${bVal.toFixed(1)}</div></div></div>`;
+                    return `<div onclick="ui.openPersonalStats('${m}')" class="settlement-card-focus"><div class="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-2">${m}</div><div class="text-[22px] font-black text-slate-900 leading-none mb-1 text-left">NT$${twd.toLocaleString()}</div><div class="text-[9px] font-bold text-slate-400 mb-4 text-left">$${total[m].toFixed(1)} Spent</div><div class="pt-2.5 border-t border-slate-100 text-left"><div class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">USD Balance</div><div class="text-[11px] font-bold ${color} leading-none">${bVal>=0.05?'+':''}$${bVal.toFixed(1)}</div></div></div>`;
                 }).join('');
-                list.innerHTML = state.expenses.length ? state.expenses.map(e => `<div onclick="ui.showExpenseModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="expense-card-compact text-left"><div class="flex items-center gap-3"><div class="icon-box-mini"><i data-lucide="${CONFIG.CAT_ICONS[e.category] || 'credit-card'}" style="color: ${CONFIG.CAT_COLORS[e.category]}"></i></div><div><h4 class="font-black text-[14px] text-slate-800 leading-none mb-1 truncate w-40">${e.title || ''}</h4><p class="text-[8px] text-slate-400 font-medium uppercase">By ${e.payer}</p></div></div><div class="text-[15px] font-black text-slate-900 leading-none">$${Number(e.amount || 0).toLocaleString()}</div></div>`).join('') : `<div class="py-40 text-center text-slate-300 font-black opacity-40 text-xs uppercase">尚無支出</div>`;
+                list.innerHTML = state.expenses.length ? state.expenses.map(e => `<div onclick="ui.showExpenseModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="expense-card-compact text-left"><div class="flex items-center gap-3"><div class="icon-box-mini"><i data-lucide="${CONFIG.CAT_ICONS[e.category] || 'credit-card'}" style="color: ${CONFIG.CAT_COLORS[e.category]}"></i></div><div><h4 class="font-black text-[14px] text-slate-800 leading-none mb-1 truncate w-40">${e.title || ''}</h4><p class="text-[8px] text-slate-400 font-medium uppercase">By ${e.payer}</p></div></div><div class="text-[15px] font-black text-slate-900 leading-none">$${Number(e.amount || 0).toLocaleString()}</div></div>`).join('') : `<div class="py-40 text-center text-slate-300 font-black opacity-40 text-xs uppercase">尚無支出紀錄</div>`;
                 document.getElementById('total-count').innerText = `${state.expenses.length} 項紀錄`; lucide.createIcons();
             },
             showSettlementAdvice() {
@@ -493,7 +542,7 @@
                     const share = (Number(e.amount) || 0) / (e.participants?.length || 1);
                     usd += share; cats[e.category] = (cats[e.category] || 0) + share;
                     return `<div class="personal-item-card shadow-sm text-left"><div class="flex items-center gap-3"><div class="icon-box-mini" style="color: ${CONFIG.CAT_COLORS[e.category]}"><i data-lucide="${CONFIG.CAT_ICONS[e.category] || 'credit-card'}"></i></div><div><h5 class="text-xs font-black text-slate-800 truncate w-32">${e.title || '未命名'}</h5><p class="text-[8px] text-slate-400 font-bold uppercase">${e.category}</p></div></div><div class="text-right"><span class="personal-item-share">$${share.toFixed(1)}</span><p class="text-[8px] text-slate-300 font-bold mt-1">Total $${e.amount}</p></div></div>`;
-                }).join('') || `<div class="py-10 text-center text-slate-300 font-bold text-xs uppercase">尚無消費</div>`;
+                }).join('') || `<div class="py-10 text-center text-slate-300 font-bold text-xs uppercase">尚無個人消費紀錄</div>`;
                 document.getElementById('stat-totals-container').innerHTML = `<div class="text-center"><div class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">${name} 個人總支出</div><div class="text-[24px] font-black text-slate-900">NT$${Math.round(usd * CONFIG.EXCHANGE_RATE).toLocaleString()} <span class="text-[14px] font-bold text-slate-400">($${usd.toFixed(1)})</span></div></div>`;
                 document.getElementById('personal-item-list').innerHTML = listHtml;
                 const ctx = document.getElementById('personal-chart').getContext('2d'); if (state.statsChart) state.statsChart.destroy();
