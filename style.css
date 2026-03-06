@@ -1,16 +1,17 @@
-/* 引入外部字體 */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-    /* iOS 風格配色與變數 */
     --ios-blue: #007AFF;
     --ios-bg: #F2F2F7;
     --card-shadow: 0 4px 20px rgba(0,0,0,0.05);
     --header-blur: saturate(180%) blur(25px);
     --max-content-width: 650px;
+    /* 預設 Header 與 Nav 高度，用於內容偏移 */
+    --header-height: 149px; 
+    --nav-height: 64px;
 }
 
-/* 基礎設定 */
+/* 基礎設定：禁止 body 滾動造成的跑版 */
 body {
     font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
     background: var(--ios-bg);
@@ -18,38 +19,22 @@ body {
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
     width: 100vw;
+    margin: 0;
 }
 
-/* 安全區域適配 */
-.safe-top {
-    padding-top: env(safe-area-inset-top);
-}
-
-.safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-}
-
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-
-.content-container {
-    width: 100%;
-    max-width: var(--max-content-width);
-    margin: 0 auto;
-}
-
-/* --- Header 導覽系統 --- */
+/* --- 固定 Header 系統 --- */
 .glass-header {
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: var(--header-blur);
     -webkit-backdrop-filter: var(--header-blur);
-    position: sticky;
-    top: 0;
+    position: fixed; /* 改為絕對釘選 */
+    top: 0; left: 0; right: 0;
     z-index: 1000;
     border-bottom: 0.5px solid rgba(0,0,0,0.06);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: height, transform;
+    /* 關鍵：避開頂部狀態列 */
+    padding-top: env(safe-area-inset-top); 
+    will-change: transform, height;
 }
 
 .header-main-row {
@@ -62,14 +47,14 @@ body {
     overflow: hidden;
 }
 
-/* 滾動縮小時隱藏主標題列 */
+/* 滾動縮小時的狀態 */
 .header-scrolled .header-main-row {
     height: 0;
     opacity: 0;
     pointer-events: none;
 }
 
-/* --- 日期選擇器元件 --- */
+/* --- 日期選擇器 --- */
 .date-picker-scroll {
     display: flex;
     gap: 12px;
@@ -80,63 +65,20 @@ body {
 }
 
 .date-card-new {
-    min-width: 65px;
-    height: 85px;
-    border-radius: 18px;
-    background: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(0,0,0,0.02);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    flex-shrink: 0;
+    min-width: 65px; height: 85px; border-radius: 18px; background: white;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border: 1px solid rgba(0,0,0,0.02); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer; flex-shrink: 0;
 }
 
 .date-card-new.active {
     background: var(--ios-blue);
     color: white;
     box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3);
-    border-color: transparent;
-    transform: scale(1.02);
-}
-
-.date-card-new .day-label {
-    font-size: 9px;
-    font-weight: 800;
-    opacity: 0.6;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-    transition: all 0.2s ease;
-}
-
-.date-card-new.active .day-label {
-    opacity: 1;
-}
-
-.date-card-new .week-label {
-    font-size: 11px;
-    font-weight: 700;
-    margin-bottom: 2px;
-    transition: all 0.2s ease;
-}
-
-.date-card-new .date-val {
-    font-size: 17px;
-    font-weight: 800;
-    transition: all 0.3s ease;
-}
-
-/* 滾動縮小後的日期卡片樣式 */
-.header-scrolled .date-picker-scroll {
-    padding: 10px 20px;
 }
 
 .header-scrolled .date-card-new {
-    height: 45px;
-    min-width: 55px;
-    border-radius: 12px;
+    height: 45px; min-width: 55px; border-radius: 12px;
 }
 
 .header-scrolled .day-label, 
@@ -144,460 +86,53 @@ body {
     display: none;
 }
 
-.header-scrolled .date-val {
-    font-size: 14px;
-}
-
-/* --- 行程時間軸佈局 --- */
-.iti-item-row {
-    display: flex;
-    gap: 16px;
-    position: relative;
-    margin-bottom: 12px;
-    width: 100%;
-}
-
-.iti-timeline-col {
-    width: 34px;
-    flex-shrink: 0;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* 虛線時間軸 */
-.iti-line-dashed {
-    position: absolute;
-    left: 50%;
-    top: 34px;
-    bottom: -12px;
-    width: 0;
-    border-left: 2px dashed #D1D1D6;
-    transform: translateX(-50%);
-    z-index: 0;
-}
-
-.iti-icon-box {
-    width: 34px;
-    height: 34px;
-    background: var(--ios-blue);
-    color: white;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 10;
-    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2);
-    flex-shrink: 0;
-}
-
-.iti-content-col {
-    flex: 1;
-    min-width: 0;
-    padding-bottom: 12px;
-}
-
-/* 行程主卡片 */
-.iti-main-item-card {
-    background: white;
-    border-radius: 22px;
-    padding: 18px;
-    box-shadow: var(--card-shadow);
-    border: 1px solid rgba(0,0,0,0.01);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-}
-
-/* 備註卡片：2px 間距與 #F8F9FA 底色 */
-.iti-sub-item-card {
-    background: #F8F9FA;
-    border-radius: 16px;
-    padding: 12px 16px;
-    margin-top: 2px;
-    color: #48484A;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: pre-wrap;
-    line-height: 1.5;
-    border: 1px solid rgba(0, 0, 0, 0.02);
-    width: 100%;
-}
-
-/* 交通卡片 */
-.iti-transfer-card {
-    background: #F0F2F5;
-    border-radius: 20px;
-    padding: 10px 14px;
-    margin: 6px 0 14px 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    border: 1px solid rgba(0,0,0,0.02);
-}
-
-.iti-transfer-card.clickable {
-    cursor: pointer;
-}
-
-/* 動作按鈕 */
-.nav-action-btn {
-    width: 36px;
-    height: 36px;
-    background: var(--ios-blue);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2);
-    flex-shrink: 0;
-}
-
-/* --- 攻略步驟樣式 --- */
-.strat-step-item {
-    display: flex;
-    gap: 14px;
-    background: white;
-    border-radius: 20px;
-    padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    border: 1px solid rgba(0,0,0,0.01);
-}
-
-.strat-step-num {
-    width: 28px;
-    height: 28px;
-    background: var(--ios-blue);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 800;
-    flex-shrink: 0;
-}
-
-.strat-step-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.strat-step-title {
-    font-size: 14px;
-    font-weight: 800;
-    color: #1c1c1e;
-    margin-bottom: 4px;
-}
-
-.strat-step-detail {
-    font-size: 13px;
-    color: #636366;
-    line-height: 1.6;
-}
-
-/* --- 分帳與個人分析 --- */
-.settlement-card-focus {
-    background: white;
-    border: 1px solid rgba(0,0,0,0.05);
-    border-radius: 24px;
-    padding: 18px 20px;
-    min-width: 185px;
-    transition: 0.2s;
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.04);
-    flex-shrink: 0;
-}
-
-.expense-card-compact {
-    background: white;
-    border-radius: 18px;
-    padding: 14px;
-    border: 1px solid rgba(0,0,0,0.01);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: 0.2s;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-    margin-bottom: 8px;
-    width: 100%;
-}
-
-.advice-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: white;
-    border-radius: 18px;
-    padding: 16px;
-    margin-bottom: 12px;
-    border: 1px solid rgba(0,0,0,0.03);
-}
-
-/* 個人分析詳情 */
-.personal-item-card {
-    background: white;
-    border-radius: 16px;
-    padding: 14px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border: 1px solid rgba(0,0,0,0.02);
-    width: 100%;
-}
-
-.personal-item-share {
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--ios-blue);
-    background: rgba(0, 122, 255, 0.08);
-    padding: 2px 8px;
-    border-radius: 8px;
-}
-
-.metric-block {
-    display: flex;
-    flex-direction: column;
-}
-
-.metric-label {
-    font-size: 8px;
-    font-weight: 900;
-    color: #8E8E93;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-}
-
-.metric-value {
-    font-size: 20px;
-    font-weight: 800;
-    color: #1c1c1e;
-    line-height: 1.1;
-}
-
-/* --- 彈窗系統樣式 --- */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index: 2000;
-    display: none;
-    opacity: 0;
-    transition: 0.3s;
-    align-items: flex-end;
-    justify-content: center;
-}
-
-.modal-overlay.show {
-    display: flex;
-    opacity: 1;
-}
-
-.modal-box {
-    background: white;
-    border-radius: 30px 30px 0 0;
-    width: 100%;
-    max-height: 94vh;
-    display: flex;
-    flex-direction: column;
-    transform: translateY(100%);
-    transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-    overflow: hidden;
-}
-
-.modal-overlay.show .modal-box {
-    transform: translateY(0);
-}
-
-.modal-header-fixed {
-    padding: 18px 20px;
-    background: white;
-    border-bottom: 0.5px solid rgba(0,0,0,0.05);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-    position: relative;
-}
-
-.modal-content-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-}
-
-.modal-footer-fixed {
-    padding: 16px 24px;
-    background: white;
-    border-top: 0.5px solid rgba(0,0,0,0.06);
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    flex-shrink: 0;
-}
-
-/* --- 圖片上傳區域 --- */
-.image-upload-box {
-    width: 100%;
-    height: 180px;
-    background: #F2F2F7;
-    border-radius: 20px;
-    border: 2px dashed #D1D1D6;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #8E8E93;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 12px;
-    cursor: pointer;
-}
-
-.image-upload-box.uploading {
-    opacity: 0.5;
-    cursor: wait;
-}
-
-.image-upload-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.image-upload-box input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.remove-img-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 50;
-    width: 28px;
-    height: 28px;
-    background: rgba(0,0,0,0.6);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* --- 底部導覽列 --- */
+/* --- 固定底部導覽列 --- */
 .glass-nav {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: var(--header-blur);
     -webkit-backdrop-filter: var(--header-blur);
     border-top: 0.5px solid rgba(0,0,0,0.08);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    position: fixed; /* 釘死在底部 */
+    bottom: 0; left: 0; right: 0;
     z-index: 1500;
+    /* 關鍵：避開底部小白條 */
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .nav-card {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 12px 0;
-    color: #8E8E93;
-    transition: 0.2s;
-    cursor: pointer;
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 4px; padding: 12px 0; color: #8E8E93; transition: 0.2s;
 }
 
-.nav-card.active {
-    color: var(--ios-blue);
-}
+.nav-card.active { color: var(--ios-blue); }
 
-/* --- 其他 UI 元件 --- */
-.fab-button {
-    position: fixed;
-    bottom: 100px;
-    right: 24px;
-    width: 56px;
-    height: 56px;
-    background: var(--ios-blue);
-    color: white;
-    border-radius: 28px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3);
-    z-index: 1400;
-}
-
-.banner-dark {
-    background: linear-gradient(145deg, #111827, #1f2937);
-}
-
-.delete-btn-text {
+/* --- 內容區域偏移設定 --- */
+.view-section {
     width: 100%;
-    padding: 12px;
-    color: #FF3B30;
-    font-weight: 700;
-    font-size: 14px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.2s;
-    display: none;
+    /* 確保內容不會被 Fixed Header 擋住 */
+    padding-top: calc(149px + env(safe-area-inset-top)); 
+    /* 確保內容不會被 Fixed Nav 擋住 */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
 }
 
-.delete-btn-text:active {
-    opacity: 0.5;
+/* 縮小時自動減少內容區的頂部距離 (由 JS 動態切換或透過 CSS 狀態) */
+.body-scrolled .view-section {
+    padding-top: calc(71px + env(safe-area-inset-top));
 }
 
-.user-chip {
-    padding: 8px 16px;
-    border-radius: 12px;
-    background: #F2F2F7;
-    font-size: 12px;
-    font-weight: 700;
-    color: #8E8E93;
-    cursor: pointer;
-    transition: 0.2s;
-    border: 1.5px solid transparent;
-    display: inline-block;
-    margin-right: 8px;
-    margin-bottom: 8px;
-}
+/* --- 其他元件樣式 --- */
+.iti-item-row { display: flex; gap: 16px; position: relative; margin-bottom: 12px; }
+.iti-timeline-col { width: 34px; flex-shrink: 0; position: relative; display: flex; justify-content: center; }
+.iti-line-dashed { position: absolute; left: 50%; top: 34px; bottom: -12px; border-left: 2px dashed #D1D1D6; z-index: 0; }
+.iti-icon-box { width: 34px; height: 34px; background: var(--ios-blue); color: white; border-radius: 10px; position: relative; z-index: 10; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2); flex-shrink: 0; }
 
-.user-chip.selected {
-    background: #EBF5FF;
-    border-color: var(--ios-blue);
-    color: var(--ios-blue);
-}
+.iti-main-item-card { background: white; border-radius: 22px; padding: 18px; box-shadow: var(--card-shadow); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.iti-sub-item-card { background: #F8F9FA; border-radius: 16px; padding: 12px 16px; margin-top: 2px; color: #48484A; font-size: 12px; line-height: 1.5; border: 1px solid rgba(0, 0, 0, 0.02); }
 
-.input-pill {
-    width: 100%;
-    padding: 14px 20px;
-    border-radius: 16px;
-    background: #F2F2F7;
-    border: 1px solid transparent;
-    font-size: 14px;
-    font-weight: 600;
-    outline: none;
-    margin-bottom: 12px;
-}
+.fab-button { position: fixed; bottom: calc(90px + env(safe-area-inset-bottom)); right: 24px; width: 56px; height: 56px; background: var(--ios-blue); color: white; border-radius: 28px; display: none; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3); z-index: 1400; }
 
-.input-pill:focus {
-    border-color: var(--ios-blue);
-    background: white;
-}
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 2000; display: none; opacity: 0; transition: 0.3s; align-items: flex-end; justify-content: center; }
+.modal-overlay.show { display: flex; opacity: 1; }
+.modal-box { background: white; border-radius: 30px 30px 0 0; width: 100%; max-height: 94vh; display: flex; flex-direction: column; transform: translateY(100%); transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); overflow: hidden; padding-bottom: env(safe-area-inset-bottom); }
+
 
