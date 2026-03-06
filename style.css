@@ -149,12 +149,12 @@ body {
 
 /* 行程頁面：padding-top 補償 Header 與日期區 (較大) */
 #view-itinerary {
-    padding-top: calc(185px + env(safe-area-inset-top, 20px));
+    padding-top: calc(205px + env(safe-area-inset-top, 20px));
 }
 
 /* 分帳與票券：padding-top 縮小補償 (較小) */
 #view-expenses, #view-tickets {
-    padding-top: calc(85px + env(safe-area-inset-top, 20px));
+    padding-top: calc(165px + env(safe-area-inset-top, 20px));
 }
 
 /* --- 行程時間軸對齊修正 --- */
@@ -466,4 +466,5 @@ body {
     outline: none; 
     margin-bottom: 12px; 
 }
+
 
