@@ -281,14 +281,13 @@ body {
 
 .modal-content-scroll { flex: 1; overflow-y: auto; padding: 20px; }
 
-.modal-footer-fixed { 
-    padding: 16px 24px; 
-    background: white; 
-    border-top: 0.5px solid rgba(0,0,0,0.06); 
-    padding-bottom: calc(16px + env(safe-area-inset-bottom)); 
-    flex-shrink: 0; 
+.modal-footer-fixed {
+    padding: 16px 24px;
+    background: white;
+    border-top: 0.5px solid rgba(0,0,0,0.06);
+    padding-bottom: env(safe-area-inset-bottom);
+    flex-shrink: 0;
 }
-
 /* --- 優化後的票券上傳區 --- */
 .image-upload-box { 
     width: 100%; 
@@ -497,6 +496,7 @@ body {
     padding: 2px 8px; 
     border-radius: 8px; 
 }
+
 
 
 
