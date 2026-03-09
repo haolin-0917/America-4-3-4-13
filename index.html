@@ -515,24 +515,38 @@
                 } catch (err) { console.error(err); ui.showStatus("上傳失敗", 1500); } finally { overlay.style.display = 'none'; }
             },
             showExpenseModal(editingExp = null) {
-                const catEl = document.getElementById('exp-category'); if(catEl && !catEl.innerHTML) catEl.innerHTML = Object.keys(CONFIG.CAT_COLORS).map(c => `<option value="${c}">${c}</option>`).join('');
+                const catEl = document.getElementById('exp-category');
+                if (catEl) {
+                    catEl.innerHTML = `<option value="" disabled hidden>支出類別</option>` +
+                        Object.keys(CONFIG.CAT_COLORS).map(c => `<option value="${c}">${c}</option>`).join('');
+                }
+            
                 state.editingExpenseId = editingExp ? editingExp.id : null;
                 state.tempImageUrl = editingExp ? editingExp.image : null;
                 document.getElementById('expense-modal-title').innerText = editingExp ? '編輯支出' : '新增支出';
                 document.getElementById('exp-title').value = editingExp ? editingExp.title : '';
                 document.getElementById('exp-amount').value = editingExp ? editingExp.amount : '';
-                document.getElementById('exp-category').value = editingExp ? editingExp.category : '其他';
+                document.getElementById('exp-category').value = editingExp ? editingExp.category : '';
                 state.selectedPayer = editingExp ? editingExp.payer : "Zoey";
                 state.selectedParticipants = editingExp ? [...editingExp.participants] : [...CONFIG.MEMBERS];
-                const r = document.getElementById('exp-image-render'); const x = document.getElementById('exp-remove-img');
+                const r = document.getElementById('exp-image-render');
+                const x = document.getElementById('exp-remove-img');
                 const placeholder = document.getElementById('exp-upload-placeholder');
+            
                 if (state.tempImageUrl) {
-                    r.src = state.tempImageUrl; r.classList.remove('hidden'); x.classList.remove('hidden'); placeholder.classList.add('hidden');
+                    r.src = state.tempImageUrl;
+                    r.classList.remove('hidden');
+                    x.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
                 } else {
-                    r.classList.add('hidden'); x.classList.add('hidden'); placeholder.classList.remove('hidden');
+                    r.classList.add('hidden');
+                    x.classList.add('hidden');
+                    placeholder.classList.remove('hidden');
                 }
+            
                 document.getElementById('delete-exp-btn').style.display = editingExp ? 'block' : 'none';
-                this.updateChips(); this.openModal('expense-modal');
+                this.updateChips();
+                this.openModal('expense-modal');
             },
             clearExpenseImage(e) { e.stopPropagation(); state.tempImageUrl = null; document.getElementById('exp-image-render').classList.add('hidden'); document.getElementById('exp-remove-img').classList.add('hidden'); document.getElementById('exp-upload-placeholder').classList.remove('hidden'); document.getElementById('exp-image-input').value = ""; },
             async handleExpenseImage(e) {
@@ -678,6 +692,7 @@
     </script>
 </body>
 </html>
+
 
 
 
