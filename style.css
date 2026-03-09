@@ -288,6 +288,14 @@ body {
     padding-bottom: calc(16px + env(safe-area-inset-bottom)); 
     flex-shrink: 0; 
 }
+#exp-category {
+    height: 48px;
+    color: #9CA3AF;
+}
+
+#exp-category:valid {
+    color: #1c1c1e;
+}
 
 /* --- 優化後的票券上傳區 --- */
 .image-upload-box { 
@@ -482,4 +490,5 @@ body {
     padding: 2px 8px; 
     border-radius: 8px; 
 }
+
 
