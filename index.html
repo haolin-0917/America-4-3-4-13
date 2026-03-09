@@ -419,7 +419,7 @@
                     html += data.items.map(item => {
                         const isTransfer = item.type === '🚗'; const isGuide = item.type === '轉機攻略';
                         if (isTransfer || isGuide) {
-                            const guideOnClick = isGuide && item.guideSteps ? `onclick="ui.showGuideModal('${encodeURIComponent(JSON.stringify(item.guideSteps))}')"` : '';
+                            const guideOnClick = isGuide && item.guideSteps ? `onclick='ui.showGuideModal(${JSON.stringify(encodeURIComponent(JSON.stringify(item.guideSteps)))})'` : '';
                             return `<div class="iti-transfer-container"><div class="iti-transfer-card shadow-sm ${isGuide ? 'clickable' : ''}" ${guideOnClick}><div class="flex items-center gap-3 flex-grow min-w-0"><div class="w-8 h-8 rounded-full bg-slate-200/40 flex items-center justify-center text-slate-400"><i data-lucide="${isGuide ? 'book-open' : 'car'}"></i></div><div class="flex flex-col min-w-0 text-left"><div class="flex items-center">${item.time ? `<span class="text-[14px] font-black text-slate-800 leading-tight">${item.time}</span>` : ''}${isGuide ? `<span class="bg-blue-600 text-white px-1.5 py-0.5 rounded-lg text-[10px] ml-1">攻略</span>` : ''}</div><span class="text-[11px] font-bold text-slate-500 truncate w-40">${item.title || ''}</span></div></div><div class="flex items-center gap-2">${isGuide ? `<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>` : ''}${item.nav ? `<a href="${item.nav}" target="_blank" onclick="event.stopPropagation()" class="nav-action-btn"><i data-lucide="map" class="w-4 h-4"></i></a>` : ''}</div></div></div>`;
                         }
                         const isPrep = item.type === '準備'; const iconBoxStyle = isPrep ? 'style="background: #D1D1D6; box-shadow: none;"' : '';
@@ -658,5 +658,6 @@
     </script>
 </body>
 </html>
+
 
 
