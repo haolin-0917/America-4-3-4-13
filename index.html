@@ -444,7 +444,10 @@
                                 </div>`;
                         }
                         const isPrep = item.type === '準備'; const iconBoxStyle = isPrep ? 'style="background: #D1D1D6; box-shadow: none;"' : '';
-                        return `<div class="iti-item-row text-left"><div class="iti-timeline-col"><div class="iti-line-dashed"></div><div class="iti-icon-box" ${iconBoxStyle}><i data-lucide="${this.getIcon(item.type)}" class="w-4.5 h-4.5"></i></div></div><div class="iti-content-col"><div class="iti-main-item-card"><div class="min-w-0 flex-grow"><h4 class="font-black text-[17px] text-slate-900 mb-1 truncate">${item.title || '未命名'}</h4><div class="flex items-center gap-2">${item.time ? `<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg text-[10px] font-black">${item.time}</span>` : ''}</div></div>${item.nav ? `<a href="${item.nav}" target="_blank" class="nav-action-btn shadow-lg"><i data-lucide="map" class="w-4 h-4"></i></a>` : ''}</div>${item.note ? `<div class="iti-sub-item-card">${item.note}</div>` : ''}</div></div>`;
+                        return `<div class="iti-item-row text-left"><div class="iti-timeline-col"><div class="iti-line-dashed"></div><div class="iti-icon-box" ${iconBoxStyle}><i data-lucide="${this.getIcon(item.type)}" class="w-4.5 h-4.5"></i></div></div><div class="iti-content-col"><div class="iti-main-item-card"><div class="min-w-0 flex-grow"><h4 class="font-black text-[17px] text-slate-900 mb-1 truncate">${item.title || '未命名'}</h4><div class="flex items-center gap-2 flex-wrap">
+${item.time ? `<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg text-[10px] font-black">${item.time}</span>` : ''}
+${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-400 font-bold truncate max-w-[180px]"><i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0"></i>${item.location}</span>` : ''}
+</div></div>${item.nav ? `<a href="${item.nav}" target="_blank" class="nav-action-btn shadow-lg"><i data-lucide="map" class="w-4 h-4"></i></a>` : ''}</div>${item.note ? `<div class="iti-sub-item-card">${item.note}</div>` : ''}</div></div>`;
                     }).join('');
                 } else html += `<div class="py-40 text-center text-slate-300 font-black opacity-40 text-xs uppercase">此日暫無行程紀錄</div>`;
                 list.innerHTML = html; lucide.createIcons();
@@ -694,6 +697,7 @@
     </script>
 </body>
 </html>
+
 
 
 
