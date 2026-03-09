@@ -420,7 +420,27 @@
                         const isTransfer = item.type === '🚗'; const isGuide = item.type === '轉機攻略';
                         if (isTransfer || isGuide) {
                             const guideOnClick = isGuide && item.guideSteps ? `onclick='ui.showGuideModal(${JSON.stringify(encodeURIComponent(JSON.stringify(item.guideSteps)))})'` : '';
-                            return `<div class="iti-transfer-container"><div class="iti-transfer-card shadow-sm ${isGuide ? 'clickable' : ''}" ${guideOnClick}><div class="flex items-center gap-3 flex-grow min-w-0"><div class="w-8 h-8 rounded-full bg-slate-200/40 flex items-center justify-center text-slate-400"><i data-lucide="${isGuide ? 'book-open' : 'car'}"></i></div><div class="flex flex-col min-w-0 text-left"><div class="flex items-center">${item.time ? `<span class="text-[14px] font-black text-slate-800 leading-tight">${item.time}</span>` : ''}${isGuide ? `<span class="bg-blue-600 text-white px-1.5 py-0.5 rounded-lg text-[10px] ml-1">攻略</span>` : ''}</div><span class="text-[11px] font-bold text-slate-500 truncate w-40">${item.title || ''}</span></div></div><div class="flex items-center gap-2">${isGuide ? `<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>` : ''}${item.nav ? `<a href="${item.nav}" target="_blank" onclick="event.stopPropagation()" class="nav-action-btn"><i data-lucide="map" class="w-4 h-4"></i></a>` : ''}</div></div></div>`;
+                            return `<div class="iti-transfer-container">
+                                    <div class="iti-transfer-card shadow-sm ${isGuide ? 'clickable' : ''}" ${guideOnClick}>
+                                        <div class="flex items-center gap-3 flex-grow min-w-0">
+                                            <div class="w-8 h-8 rounded-full bg-slate-200/40 flex items-center justify-center text-slate-400">
+                                                <i data-lucide="${isGuide ? 'book-open' : 'car'}"></i>
+                                            </div>
+                                            <div class="flex flex-col min-w-0 text-left">
+                                                <div class="flex items-center">
+                                                    ${item.time ? `<span class="text-[14px] font-black text-slate-800 leading-tight">${item.time}</span>` : ''}
+                                                    ${isGuide ? `<span class="bg-blue-600 text-white px-1.5 py-0.5 rounded-lg text-[10px] ml-1">攻略</span>` : ''}
+                                                </div>
+                                                <span class="text-[11px] font-bold text-slate-500 truncate w-40">${item.title || ''}</span>
+                                                ${isTransfer && item.note ? `<div class="text-[10px] text-slate-400 mt-1 whitespace-pre-wrap">${item.note}</div>` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            ${isGuide ? `<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>` : ''}
+                                            ${item.nav ? `<a href="${item.nav}" target="_blank" onclick="event.stopPropagation()" class="nav-action-btn"><i data-lucide="map" class="w-4 h-4"></i></a>` : ''}
+                                        </div>
+                                    </div>
+                                </div>`;
                         }
                         const isPrep = item.type === '準備'; const iconBoxStyle = isPrep ? 'style="background: #D1D1D6; box-shadow: none;"' : '';
                         return `<div class="iti-item-row text-left"><div class="iti-timeline-col"><div class="iti-line-dashed"></div><div class="iti-icon-box" ${iconBoxStyle}><i data-lucide="${this.getIcon(item.type)}" class="w-4.5 h-4.5"></i></div></div><div class="iti-content-col"><div class="iti-main-item-card"><div class="min-w-0 flex-grow"><h4 class="font-black text-[17px] text-slate-900 mb-1 truncate">${item.title || '未命名'}</h4><div class="flex items-center gap-2">${item.time ? `<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg text-[10px] font-black">${item.time}</span>` : ''}</div></div>${item.nav ? `<a href="${item.nav}" target="_blank" class="nav-action-btn shadow-lg"><i data-lucide="map" class="w-4 h-4"></i></a>` : ''}</div>${item.note ? `<div class="iti-sub-item-card">${item.note}</div>` : ''}</div></div>`;
@@ -658,6 +678,7 @@
     </script>
 </body>
 </html>
+
 
 
 
