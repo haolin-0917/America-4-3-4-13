@@ -289,8 +289,13 @@ body {
     flex-shrink: 0; 
 }
 #exp-category {
-    height: 48px;
+    height: 50px;
+    padding: 0 20px;
     color: #9CA3AF;
+    -webkit-appearance: none;
+    appearance: none;
+    line-height: 50px;
+    background-image: none;
 }
 
 #exp-category:valid {
@@ -490,5 +495,6 @@ body {
     padding: 2px 8px; 
     border-radius: 8px; 
 }
+
 
 
