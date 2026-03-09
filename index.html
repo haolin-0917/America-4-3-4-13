@@ -132,7 +132,7 @@
         .personal-item-card { background: white; border-radius: 16px; padding: 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(0,0,0,0.02); width: 100%; }
         .personal-item-share { font-size: 11px; font-weight: 800; color: var(--ios-blue); background: rgba(0, 122, 255, 0.08); padding: 2px 8px; border-radius: 8px; }
         .delete-btn-text { width: 100%; padding: 12px; color: #FF3B30; font-weight: 700; font-size: 14px; text-align: center; cursor: pointer; }
-        .input-pill { width: 100%; padding: 14px 20px; border-radius: 16px; background: #F2F2F7; border: 1px solid transparent; font-size: 14px; font-weight: 600;color: #1c1c1e; outline: none; margin-bottom: 12px; }
+        .input-pill { width: 100%; padding: 14px 20px; border-radius: 16px; background: #F2F2F7; border: 1px solid transparent; font-size: 14px; font-weight: 600;outline: none; margin-bottom: 12px; }
         .input-pill:focus { border-color: var(--ios-blue); background: white; }
         .input-label { font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; padding-left: 4px; }
         .user-chip { padding: 8px 16px; border-radius: 12px; background: #F2F2F7; font-size: 12px; font-weight: 700; color: #8E8E93; cursor: pointer; transition: 0.2s; border: 1.5px solid transparent; display: inline-block; margin-right: 8px; margin-bottom: 8px; }
@@ -283,7 +283,7 @@
             <div class="modal-content-scroll no-scrollbar text-left">
                 <div class="space-y-4">
                     <input type="text" id="exp-title" class="input-pill" placeholder="項目名稱">
-                    <select id="exp-category" class="input-pill"></select>
+                    <select id="exp-category" class="input-pill" style="height:48px;color:#9CA3AF;"></select>
                     <input type="number" id="exp-amount" class="input-pill" placeholder="金額 (USD)" inputmode="decimal">
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-slate-400 uppercase block">付款人</label><div id="payer-list"></div>
@@ -678,6 +678,7 @@
     </script>
 </body>
 </html>
+
 
 
 
