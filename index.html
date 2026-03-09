@@ -515,13 +515,13 @@
                 } catch (err) { console.error(err); ui.showStatus("上傳失敗", 1500); } finally { overlay.style.display = 'none'; }
             },
             showExpenseModal(editingExp = null) {
-                const catEl = document.getElementById('exp-category'); if(catEl && !catEl.innerHTML) catEl.innerHTML = Object.keys(CONFIG.CAT_COLORS).map(c => `<option value="${c}">${c}</option>`).join('');
+                const catEl = document.getElementById('exp-category'); if(catEl && !catEl.innerHTML) catEl.innerHTML = `<option value="" selected disabled hidden>支出類別</option>` + Object.keys(CONFIG.CAT_COLORS).map(c => `<option value="${c}">${c}</option>`).join('');
                 state.editingExpenseId = editingExp ? editingExp.id : null;
                 state.tempImageUrl = editingExp ? editingExp.image : null;
                 document.getElementById('expense-modal-title').innerText = editingExp ? '編輯支出' : '新增支出';
                 document.getElementById('exp-title').value = editingExp ? editingExp.title : '';
                 document.getElementById('exp-amount').value = editingExp ? editingExp.amount : '';
-                document.getElementById('exp-category').value = editingExp ? editingExp.category : '其他';
+                document.getElementById('exp-category').value = editingExp ? editingExp.category : '';
                 state.selectedPayer = editingExp ? editingExp.payer : "Zoey";
                 state.selectedParticipants = editingExp ? [...editingExp.participants] : [...CONFIG.MEMBERS];
                 const r = document.getElementById('exp-image-render'); const x = document.getElementById('exp-remove-img');
@@ -678,6 +678,7 @@
     </script>
 </body>
 </html>
+
 
 
 
