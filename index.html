@@ -283,7 +283,7 @@
             <div class="modal-content-scroll no-scrollbar text-left">
                 <div class="space-y-4">
                     <input type="text" id="exp-title" class="input-pill" placeholder="項目名稱">
-                    <select id="exp-category" class="input-pill" style="height:48px;color:#9CA3AF;"></select>
+                    <select id="exp-category" class="input-pill" required><option value="" selected disabled hidden>支出類別</option></select>
                     <input type="number" id="exp-amount" class="input-pill" placeholder="金額 (USD)" inputmode="decimal">
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-slate-400 uppercase block">付款人</label><div id="payer-list"></div>
@@ -678,6 +678,7 @@
     </script>
 </body>
 </html>
+
 
 
 
