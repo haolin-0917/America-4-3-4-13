@@ -288,19 +288,6 @@ body {
     padding-bottom: calc(16px + env(safe-area-inset-bottom)); 
     flex-shrink: 0; 
 }
-#exp-category {
-    height: 50px;
-    padding: 0 20px;
-    color: #9CA3AF;
-    -webkit-appearance: none;
-    appearance: none;
-    line-height: 50px;
-    background-image: none;
-}
-
-#exp-category:valid {
-    color: #1c1c1e;
-}
 
 /* --- 優化後的票券上傳區 --- */
 .image-upload-box { 
@@ -391,6 +378,19 @@ body {
     border-color: var(--ios-blue); 
     background: white; 
     box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); 
+}
+#exp-category {
+    height: 50px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    line-height: normal;
+    color: #9CA3AF;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+#exp-category:valid {
+    color: #1c1c1e;
 }
 
 .input-label { 
@@ -495,6 +495,7 @@ body {
     padding: 2px 8px; 
     border-radius: 8px; 
 }
+
 
 
 
