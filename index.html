@@ -143,8 +143,15 @@
         .category-chip i {width: 14px;height: 14px;}
         .icon-box-mini { width: 32px; height: 32px; border-radius: 10px; background: #F8F9FB; display: flex; align-items: center; justify-content: center; }
           /* --- 票券附件按鈕  --- */
-        .ticket-attach-dot {width: 24px;height: 24px;border-radius: 999px;background: #F2F4F7;color: #64748B;display: flex;align-items: center;justify-content: center;cursor: pointer;transition: all 0.15s ease;}
-        .ticket-attach-dot:active {transform: scale(0.92);}
+        .ticket-row-card {background: white;border-radius: 20px;padding: 14px 16px;border: 1px solid rgba(0,0,0,0.03);box-shadow: 0 4px 14px rgba(0,0,0,0.03);}
+        .ticket-row-main {display: flex;align-items: center;gap: 12px;width: 100%;}
+        .ticket-row-left {flex: 1;min-width: 0;text-align: left；}
+        .ticket-row-title {font-size: 14px;font-weight: 800;color: #0f172a;line-height: 1.2;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+        .ticket-row-note {margin-top: 4px;font-size: 10px;font-weight: 600;color: #94A3B8;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+        .ticket-row-right {margin-left: auto;display: flex;align-items: center;gap: 10px;flex-shrink: 0;}
+        .ticket-meta-slot {width: 28px;display: flex;justify-content: center;align-items: center;}
+        .ticket-arrow-slot {width: 16px;display: flex;justify-content: flex-end;align-items: center;}
+        .ticket-attach-dot {width: 24px;height: 24px;border-radius: 999px;background: #F2F4F7;color: #64748B;display: flex;align-items: center;justify-content: center;}
     </style>
 </head>
 <body>
@@ -974,6 +981,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
