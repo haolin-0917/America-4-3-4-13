@@ -556,50 +556,6 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                       <option value="TWD">台幣 TWD</option>
                     `;
                   }
-                
-                  state.editingExpenseId = editingExp ? editingExp.id : null;
-                  state.tempImageUrl = editingExp ? editingExp.image : null;
-                
-                  document.getElementById('expense-modal-title').innerText = editingExp ? '編輯支出' : '新增支出';
-                  document.getElementById('exp-title').value = editingExp ? editingExp.title : '';
-                  document.getElementById('exp-amount').value = editingExp ? editingExp.amount : '';
-                  document.getElementById('exp-category').value = editingExp ? editingExp.category : '';
-                  document.getElementById('exp-currency').value = editingExp ? (editingExp.currency || 'USD') : 'USD';
-                
-                  state.selectedCurrency = editingExp ? (editingExp.currency || 'USD') : 'USD';
-                  state.selectedPayer = editingExp ? editingExp.payer : "Zoey";
-                  state.selectedParticipants = editingExp ? [...editingExp.participants] : [...CONFIG.MEMBERS];
-                
-                  const amountInput = document.getElementById('exp-amount');
-                  if (amountInput) {
-                    amountInput.placeholder = state.selectedCurrency === 'TWD' ? '金額 (TWD)' : '金額 (USD)';
-                  }
-                
-                  document.getElementById('exp-currency').onchange = (e) => {
-                    state.selectedCurrency = e.target.value;
-                    amountInput.placeholder = state.selectedCurrency === 'TWD' ? '金額 (TWD)' : '金額 (USD)';
-                  };
-                
-                  const r = document.getElementById('exp-image-render');
-                  const x = document.getElementById('exp-remove-img');
-                  const placeholder = document.getElementById('exp-upload-placeholder');
-                
-                  if (state.tempImageUrl) {
-                    r.src = state.tempImageUrl;
-                    r.classList.remove('hidden');
-                    x.classList.remove('hidden');
-                    placeholder.classList.add('hidden');
-                  } else {
-                    r.classList.add('hidden');
-                    x.classList.add('hidden');
-                    placeholder.classList.remove('hidden');
-                  }
-                
-                  document.getElementById('delete-exp-btn').style.display = editingExp ? 'block' : 'none';
-                  this.updateChips();
-                  this.openModal('expense-modal');
-                }
-            
                 state.editingExpenseId = editingExp ? editingExp.id : null;
                 state.tempImageUrl = editingExp ? editingExp.image : null;
                 document.getElementById('expense-modal-title').innerText = editingExp ? '編輯支出' : '新增支出';
@@ -728,7 +684,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
             
               document.getElementById('total-count').innerText = `${state.expenses.length} 項紀錄`;
               lucide.createIcons();
-            }
+         },
             showExpenseImagePopup(id) {
                 const exp = state.expenses.find(e => e.id === id); if (!exp || !exp.image) return;
                 document.getElementById('td-title').innerText = exp.title || '支出憑證預覽';
@@ -851,7 +807,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
             
               this.openModal('personal-stats-modal');
               lucide.createIcons();
-            }
+            },
             updateChips() {
                 const render = (id, list, sel, single) => {
                     const el = document.getElementById(id); if (el) el.innerHTML = list.map(m => `<div onclick="ui.updateSel('${id}','${m}',${single})" class="user-chip ${sel.includes(m)?'selected':''}">${m}</div>`).join('');
@@ -889,4 +845,5 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
