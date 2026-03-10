@@ -792,24 +792,27 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                         <p class="text-[8px] text-slate-400 font-medium uppercase">By ${e.payer}</p>
                       </div>
                     </div>
-                   <div class="flex items-center ml-auto">
-                    <div class="text-right mr-2">
-                      <div class="text-[15px] font-black text-slate-900 leading-none">
-                        ${this.formatCurrency(e.amount, e.currency || 'USD')}
+                   <div class="flex items-center ml-auto gap-2">
+                      <div class="text-right mr-1">
+                        <div class="text-[15px] font-black text-slate-900 leading-none">
+                          ${this.formatCurrency(e.amount, e.currency || 'USD')}
+                        </div>
+                        <div class="text-[9px] text-slate-400 mt-1">
+                          折合 NT$${Math.round(this.convertToTWD(e.amount, e.currency || 'USD')).toLocaleString()}
+                        </div>
                       </div>
-                      <div class="text-[9px] text-slate-400 mt-1">
-                        折合 NT$${Math.round(this.convertToTWD(e.amount, e.currency || 'USD')).toLocaleString()}
+                    
+                      <div
+                        ${e.image ? `onclick="event.stopPropagation(); ui.showExpenseImagePopup(${e.id})"` : ''}
+                        class="ticket-attach-dot ${!e.image ? 'invisible' : ''}">
+                        <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
                       </div>
                     </div>
-                    
+
                     <div
                       ${e.image ? `onclick="event.stopPropagation(); ui.showExpenseImagePopup(${e.id})"` : ''}
-                      class="w-7 flex justify-center flex-shrink-0">
-                    
-                      ${e.image
-                        ? `<i data-lucide="paperclip" class="w-4.5 h-4.5 text-slate-400"></i>`
-                        : `<span class="w-4.5 h-4.5"></span>`
-                      }
+                      class="ticket-attach-dot ${!e.image ? 'invisible' : ''}">
+                      <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
                     </div>
                     </div>
                     </div>
@@ -980,6 +983,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
