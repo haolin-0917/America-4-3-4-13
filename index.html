@@ -756,15 +756,22 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                       </div>
                     </div>
                     <div class="flex items-center gap-3">
-                      ${e.image ? `<div onclick="event.stopPropagation(); ui.showExpenseImagePopup(${e.id})" class="p-2 -m-2 text-blue-600"><i data-lucide="paperclip" class="w-4.5 h-4.5"></i></div>` : ''}
-                      <div class="text-right">
-                        <div class="text-[15px] font-black text-slate-900 leading-none">
-                          ${this.formatCurrency(e.amount, e.currency || 'USD')}
-                        </div>
-                        <div class="text-[9px] text-slate-400 mt-1">
-                          折合 NT$${Math.round(this.convertToTWD(e.amount, e.currency || 'USD')).toLocaleString()}
-                        </div>
+
+                    <div class="text-right">
+                      <div class="text-[15px] font-black text-slate-900 leading-none">
+                        ${this.formatCurrency(e.amount, e.currency || 'USD')}
                       </div>
+                      <div class="text-[9px] text-slate-400 mt-1">
+                        折合 NT$${Math.round(this.convertToTWD(e.amount, e.currency || 'USD')).toLocaleString()}
+                      </div>
+                    </div>
+                    
+                    ${e.image ? `<div onclick="event.stopPropagation(); ui.showExpenseImagePopup(${e.id})" class="p-2 -m-2 text-blue-600 flex-shrink-0">
+                    <i data-lucide="paperclip" class="w-4.5 h-4.5"></i>
+                    </div>` : ''}
+                    
+                    </div>
+
                     </div>
                   </div>
                 `).join('')
@@ -933,6 +940,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
