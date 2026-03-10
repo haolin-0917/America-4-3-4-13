@@ -643,8 +643,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                 return `
                   <div onclick="ui.openPersonalStats('${m}')" class="settlement-card-focus text-left">
                     <div class="text-[10px] font-black text-slate-400 uppercase mb-2">${m}</div>
-                    <div class="text-[22px] font-black text-slate-900 leading-none mb-1">NT$${spent.toLocaleString()}</div>
-                    <div class="text-[9px] font-bold text-slate-400 mb-4">已分攤金額</div>
+                    <div class="text-[22px] font-black text-slate-900 leading-none mb-4">NT$${spent.toLocaleString()}</div>
                     <div class="pt-2.5 border-t border-slate-100">
                       <div class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">TWD Balance</div>
                       <div class="text-[11px] font-bold ${color} leading-none">
@@ -845,5 +844,6 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
