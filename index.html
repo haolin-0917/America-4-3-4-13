@@ -285,7 +285,7 @@
                 <div class="space-y-4">
                     <input type="text" id="exp-title" class="input-pill" placeholder="項目名稱">
                     <select id="exp-category" class="input-pill" required></select>
-                    <input type="number" id="exp-amount" class="input-pill" placeholder="金額 (USD)" inputmode="decimal">
+                    <select id="exp-currency" class="input-pill"><option value="USD">美元 USD</option><option value="TWD">台幣 TWD</option></select><input type="number"id="exp-amount"class="input-pill"placeholder="金額"inputmode="decimal">
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-slate-400 uppercase block">付款人</label><div id="payer-list"></div>
                         <label class="text-[10px] font-black text-slate-400 uppercase mt-4 block">分攤者</label><div id="part-list"></div>
@@ -320,7 +320,7 @@
             EXPENSE_ID: "expense",
             TICKET_ID: "ticket",
             BUCKET_ID: "Americiaimg",
-            EXCHANGE_RATE: 32.5,
+            EXCHANGE_RATE: 31.8,
             MEMBERS: ["Zoey", "Jess", "Zhe", "Sunny"],
             CAT_COLORS: {'交通':'#007AFF','餐飲':'#FF3B30','小費':'#34C759','門票活動':'#FFCC00','購物':'#FF9500','其他':'#8E8E93','機票':'#AF52DE','住宿':'#5856D6'},
             CAT_ICONS: {'交通':'car','餐飲':'utensils','小費':'dollar-sign','門票活動':'ticket','購物':'shopping-bag','邀請者':'users','其他':'credit-card','機票':'plane','住宿':'bed'}
@@ -360,7 +360,11 @@
             },
             submitExpense() {
                 const title = document.getElementById('exp-title').value.trim();
-                const amount = Number(document.getElementById('exp-amount').value);
+                const rawAmount = Number(document.getElementById('exp-amount').value);
+                const currency = document.getElementById('exp-currency').value;
+                let amount = rawAmount;
+                if (currency === "TWD") {amount = rawAmount / CONFIG.EXCHANGE_RATE;
+                }
                 const category = document.getElementById('exp-category').value;
                 if (!title || isNaN(amount)) return;
                 const old = state.expenses.find(e => e.id === state.editingExpenseId);
@@ -368,7 +372,7 @@
                 if (state.editingExpenseId) {
                     state.expenses = state.expenses.map(e => e.id === state.editingExpenseId ? { ...e, title, amount, category, payer: state.selectedPayer, participants: [...state.selectedParticipants], image: state.tempImageUrl } : e);
                 } else {
-                    state.expenses.unshift({ id: Date.now(), title, amount, currency: 'USD', category, payer: state.selectedPayer, participants: [...state.selectedParticipants], date: new Date().toISOString(), image: state.tempImageUrl });
+                    state.expenses.unshift({ id: Date.now(), title, amount, currency: 'USD',original_amount: rawAmount,original_currency: currency, category, payer: state.selectedPayer, participants: [...state.selectedParticipants], date: new Date().toISOString(), image: state.tempImageUrl });
                 }
                 this.saveExpenses(); ui.closeModal('expense-modal');
             },
@@ -584,7 +588,8 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                     const bVal = bal[m]; const color = bVal >= 0.05 ? 'text-green-500' : (bVal <= -0.05 ? 'text-slate-400' : 'text-slate-300');
                     return `<div onclick="ui.openPersonalStats('${m}')" class="settlement-card-focus text-left"><div class="text-[10px] font-black text-slate-400 uppercase mb-2">${m}</div><div class="text-[22px] font-black text-slate-900 leading-none mb-1">NT$${twd.toLocaleString()}</div><div class="text-[9px] font-bold text-slate-400 mb-4">$${total[m].toFixed(1)} Spent</div><div class="pt-2.5 border-t border-slate-100"><div class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">USD Balance</div><div class="text-[11px] font-bold ${color} leading-none">${bVal>=0.05?'+':''}$${bVal.toFixed(1)}</div></div></div>`;
                 }).join('');
-                list.innerHTML = state.expenses.length ? state.expenses.map(e => `<div onclick="ui.showExpenseModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="expense-card-compact text-left"><div class="flex items-center gap-3"><div class="icon-box-mini"><i data-lucide="${CONFIG.CAT_ICONS[e.category] || 'credit-card'}" style="color: ${CONFIG.CAT_COLORS[e.category]}"></i></div><div><h4 class="font-black text-[14px] text-slate-800 leading-none mb-1 truncate w-32 md:w-40">${e.title || ''}</h4><p class="text-[8px] text-slate-400 font-medium uppercase">By ${e.payer}</p></div></div><div class="flex items-center gap-3">${e.image ? `<div onclick="event.stopPropagation(); ui.showExpenseImagePopup(${e.id})" class="p-2 -m-2 text-blue-600"><i data-lucide="paperclip" class="w-4.5 h-4.5"></i></div>` : ''}<div class="text-[15px] font-black text-slate-900 leading-none">$${Number(e.amount || 0).toLocaleString()}</div></div></div>`).join('') : `<div class="py-40 text-center text-slate-300 font-black opacity-40 text-xs uppercase">尚無支出紀錄</div>`;
+                list.innerHTML = state.expenses.length ? state.expenses.map(e => `<div onclick="ui.showExpenseModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="expense-card-compact text-left"><div class="flex items-center gap-3"><div class="icon-box-mini"><i data-lucide="${CONFIG.CAT_ICONS[e.category] || 'credit-card'}" style="color: ${CONFIG.CAT_COLORS[e.category]}"></i></div><div><h4 class="font-black text-[14px] text-slate-800 leading-none mb-1 truncate w-32 md:w-40">${e.title || ''}</h4><p class="text-[8px] text-slate-400 font-medium uppercase">By ${e.payer}</p></div></div><div class="flex items-center gap-3">${e.image ? `<div onclick="event.stopPropagation(); ui.showExpenseImagePopup(${e.id})" class="p-2 -m-2 text-blue-600"><i data-lucide="paperclip" class="w-4.5 h-4.5"></i></div>` : ''}<div class="text-[15px] font-black text-slate-900 leading-none">${e.original_currency === "TWD"? `NT$${e.original_amount}`: `$${e.original_amount}`
+}</div></div></div>`).join('') : `<div class="py-40 text-center text-slate-300 font-black opacity-40 text-xs uppercase">尚無支出紀錄</div>`;
                 document.getElementById('total-count').innerText = `${state.expenses.length} 項紀錄`; lucide.createIcons();
             },
             showExpenseImagePopup(id) {
@@ -697,6 +702,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
