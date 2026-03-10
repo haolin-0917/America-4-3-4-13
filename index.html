@@ -133,8 +133,8 @@
         .delete-btn-text { width: 100%; padding: 12px; color: #FF3B30; font-weight: 700; font-size: 14px; text-align: center; cursor: pointer; }
         .input-pill { width: 100%; padding: 14px 20px; border-radius: 16px; background: #F2F2F7; border: 1px solid transparent; font-size: 14px; font-weight: 600;outline: none; margin-bottom: 12px; }
         .input-pill:focus { border-color: var(--ios-blue); background: white; }
-        #exp-category {height: 50px;padding: 0 20px;box-sizing: border-box;line-height: normal;color: #9CA3AF;appearance: none;-webkit-appearance: none;}
-        #exp-category:valid {color: #1c1c1e;}
+        #exp-category,#exp-currency {height: 50px;padding: 0 20px;box-sizing: border-box;line-height: normal;color: #9CA3AF;appearance: none;-webkit-appearance: none;}
+        #exp-category:valid,#exp-currency:valid {color: #1c1c1e;}
         .input-label { font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; padding-left: 4px; }
         .user-chip { padding: 8px 16px; border-radius: 12px; background: #F2F2F7; font-size: 12px; font-weight: 700; color: #8E8E93; cursor: pointer; transition: 0.2s; border: 1.5px solid transparent; display: inline-block; margin-right: 8px; margin-bottom: 8px; }
         .user-chip.selected { background: #EBF5FF; border-color: var(--ios-blue); color: var(--ios-blue); }
@@ -285,7 +285,11 @@
                 <div class="space-y-4">
                     <input type="text" id="exp-title" class="input-pill" placeholder="項目名稱">
                     <select id="exp-category" class="input-pill" required></select>
-                    <input type="number" id="exp-amount" class="input-pill" placeholder="金額 (USD)" inputmode="decimal">
+                    <select id="exp-currency" class="input-pill" required>
+                      <option value="USD">美金 USD</option>
+                      <option value="TWD">台幣 TWD</option>
+                    </select>
+<input type="number" id="exp-amount" class="input-pill" placeholder="金額" inputmode="decimal">
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-slate-400 uppercase block">付款人</label><div id="payer-list"></div>
                         <label class="text-[10px] font-black text-slate-400 uppercase mt-4 block">分攤者</label><div id="part-list"></div>
@@ -320,13 +324,17 @@
             EXPENSE_ID: "expense",
             TICKET_ID: "ticket",
             BUCKET_ID: "Americiaimg",
-            EXCHANGE_RATE: 32.5,
+            EXCHANGE_RATE: 31.8,
+            CURRENCIES: {
+              USD: { label: '美金', symbol: 'US$' },
+              TWD: { label: '台幣', symbol: 'NT$' }
+            },
             MEMBERS: ["Zoey", "Jess", "Zhe", "Sunny"],
             CAT_COLORS: {'交通':'#007AFF','餐飲':'#FF3B30','小費':'#34C759','門票活動':'#FFCC00','購物':'#FF9500','其他':'#8E8E93','機票':'#AF52DE','住宿':'#5856D6'},
             CAT_ICONS: {'交通':'car','餐飲':'utensils','小費':'dollar-sign','門票活動':'ticket','購物':'shopping-bag','邀請者':'users','其他':'credit-card','機票':'plane','住宿':'bed'}
         };
         const supabase = createClient(CONFIG.URL, CONFIG.KEY);
-        let state = { itinerary: {}, expenses: [], tickets: [], currentDay: 1, selectedPayer: "Zoey", selectedParticipants: ["Zoey", "Jess", "Zhe", "Sunny"], activeView: 'itinerary', editingExpenseId: null, editingTicketId: null, balances: {}, tempImageUrl: null, statsChart: null };
+        let state = { itinerary: {}, expenses: [], tickets: [], currentDay: 1, selectedPayer: "Zoey", selectedParticipants: ["Zoey", "Jess", "Zhe", "Sunny"],selectedCurrency: "USD", activeView: 'itinerary', editingExpenseId: null, editingTicketId: null, balances: {}, tempImageUrl: null, statsChart: null };
 
         const logic = {
             async loadAll() {
@@ -400,6 +408,19 @@
         };
 
         const ui = {
+            convertToTWD(amount, currency) {
+                const val = Number(amount) || 0;
+                return currency === 'USD'
+                  ? val * CONFIG.EXCHANGE_RATE
+                  : val;
+              },
+            
+              formatCurrency(amount, currency) {
+                const val = Number(amount) || 0;
+                return currency === 'TWD'
+                  ? `NT$${val.toLocaleString()}`
+                  : `US$${val.toLocaleString()}`;
+              },
             renderAll() { this.renderItinerary(state.currentDay); this.renderExpenses(); this.renderTickets(); this.initDatePicker(); },
             switchView(v) {
                 state.activeView = v;
@@ -519,10 +540,64 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                 } catch (err) { console.error(err); ui.showStatus("上傳失敗", 1500); } finally { overlay.style.display = 'none'; }
             },
             showExpenseModal(editingExp = null) {
-                const catEl = document.getElementById('exp-category');
-                if (catEl) {
-                    catEl.innerHTML = `<option value="" disabled hidden>支出類別</option>` +
-                        Object.keys(CONFIG.CAT_COLORS).map(c => `<option value="${c}">${c}</option>`).join('');
+                  const catEl = document.getElementById('exp-category');
+                  if (catEl) {
+                    catEl.innerHTML =
+                      `<option value="" disabled hidden>支出類別</option>` +
+                      Object.keys(CONFIG.CAT_COLORS)
+                        .map(c => `<option value="${c}">${c}</option>`)
+                        .join('');
+                  }
+                
+                  const currencyEl = document.getElementById('exp-currency');
+                  if (currencyEl) {
+                    currencyEl.innerHTML = `
+                      <option value="USD">美金 USD</option>
+                      <option value="TWD">台幣 TWD</option>
+                    `;
+                  }
+                
+                  state.editingExpenseId = editingExp ? editingExp.id : null;
+                  state.tempImageUrl = editingExp ? editingExp.image : null;
+                
+                  document.getElementById('expense-modal-title').innerText = editingExp ? '編輯支出' : '新增支出';
+                  document.getElementById('exp-title').value = editingExp ? editingExp.title : '';
+                  document.getElementById('exp-amount').value = editingExp ? editingExp.amount : '';
+                  document.getElementById('exp-category').value = editingExp ? editingExp.category : '';
+                  document.getElementById('exp-currency').value = editingExp ? (editingExp.currency || 'USD') : 'USD';
+                
+                  state.selectedCurrency = editingExp ? (editingExp.currency || 'USD') : 'USD';
+                  state.selectedPayer = editingExp ? editingExp.payer : "Zoey";
+                  state.selectedParticipants = editingExp ? [...editingExp.participants] : [...CONFIG.MEMBERS];
+                
+                  const amountInput = document.getElementById('exp-amount');
+                  if (amountInput) {
+                    amountInput.placeholder = state.selectedCurrency === 'TWD' ? '金額 (TWD)' : '金額 (USD)';
+                  }
+                
+                  document.getElementById('exp-currency').onchange = (e) => {
+                    state.selectedCurrency = e.target.value;
+                    amountInput.placeholder = state.selectedCurrency === 'TWD' ? '金額 (TWD)' : '金額 (USD)';
+                  };
+                
+                  const r = document.getElementById('exp-image-render');
+                  const x = document.getElementById('exp-remove-img');
+                  const placeholder = document.getElementById('exp-upload-placeholder');
+                
+                  if (state.tempImageUrl) {
+                    r.src = state.tempImageUrl;
+                    r.classList.remove('hidden');
+                    x.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                  } else {
+                    r.classList.add('hidden');
+                    x.classList.add('hidden');
+                    placeholder.classList.remove('hidden');
+                  }
+                
+                  document.getElementById('delete-exp-btn').style.display = editingExp ? 'block' : 'none';
+                  this.updateChips();
+                  this.openModal('expense-modal');
                 }
             
                 state.editingExpenseId = editingExp ? editingExp.id : null;
@@ -569,41 +644,108 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                     document.getElementById('exp-remove-img').classList.remove('hidden'); document.getElementById('exp-upload-placeholder').classList.add('hidden');
                 } catch (err) { console.error(err); ui.showStatus("上傳失敗", 1500); } finally { overlay.style.display = 'none'; }
             },
-            renderExpenses() {
-                const summary = document.getElementById('settlement-summary'); const list = document.getElementById('expense-list'); if(!summary || !list) return;
-                let bal = {}; let total = {}; CONFIG.MEMBERS.forEach(m => { bal[m] = 0; total[m] = 0; });
-                state.expenses.forEach(e => {
-                    const amt = Number(e.amount) || 0; const parts = Array.isArray(e.participants) ? e.participants : [];
-                    const share = amt / (parts.length || 1);
-                    parts.forEach(p => { if (CONFIG.MEMBERS.includes(p)) { total[p] += share; bal[p] -= share; } });
-                    if (CONFIG.MEMBERS.includes(e.payer)) bal[e.payer] += amt;
+         renderExpenses() {
+              const summary = document.getElementById('settlement-summary');
+              const list = document.getElementById('expense-list');
+              if (!summary || !list) return;
+            
+              let balTWD = {};
+              let totalTWD = {};
+            
+              CONFIG.MEMBERS.forEach(m => {
+                balTWD[m] = 0;
+                totalTWD[m] = 0;
+              });
+            
+              state.expenses.forEach(e => {
+                const amountTWD = this.convertToTWD(e.amount, e.currency || 'USD');
+                const parts = Array.isArray(e.participants) ? e.participants : [];
+                const shareTWD = amountTWD / (parts.length || 1);
+            
+                parts.forEach(p => {
+                  if (CONFIG.MEMBERS.includes(p)) {
+                    totalTWD[p] += shareTWD;
+                    balTWD[p] -= shareTWD;
+                  }
                 });
-                state.balances.USD = bal;
-                summary.innerHTML = CONFIG.MEMBERS.map(m => {
-                    const twd = Math.round(total[m] * CONFIG.EXCHANGE_RATE);
-                    const bVal = bal[m]; const color = bVal >= 0.05 ? 'text-green-500' : (bVal <= -0.05 ? 'text-slate-400' : 'text-slate-300');
-                    return `<div onclick="ui.openPersonalStats('${m}')" class="settlement-card-focus text-left"><div class="text-[10px] font-black text-slate-400 uppercase mb-2">${m}</div><div class="text-[22px] font-black text-slate-900 leading-none mb-1">NT$${twd.toLocaleString()}</div><div class="text-[9px] font-bold text-slate-400 mb-4">$${total[m].toFixed(1)} Spent</div><div class="pt-2.5 border-t border-slate-100"><div class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">USD Balance</div><div class="text-[11px] font-bold ${color} leading-none">${bVal>=0.05?'+':''}$${bVal.toFixed(1)}</div></div></div>`;
-                }).join('');
-                list.innerHTML = state.expenses.length ? state.expenses.map(e => `<div onclick="ui.showExpenseModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="expense-card-compact text-left"><div class="flex items-center gap-3"><div class="icon-box-mini"><i data-lucide="${CONFIG.CAT_ICONS[e.category] || 'credit-card'}" style="color: ${CONFIG.CAT_COLORS[e.category]}"></i></div><div><h4 class="font-black text-[14px] text-slate-800 leading-none mb-1 truncate w-32 md:w-40">${e.title || ''}</h4><p class="text-[8px] text-slate-400 font-medium uppercase">By ${e.payer}</p></div></div><div class="flex items-center gap-3">${e.image ? `<div onclick="event.stopPropagation(); ui.showExpenseImagePopup(${e.id})" class="p-2 -m-2 text-blue-600"><i data-lucide="paperclip" class="w-4.5 h-4.5"></i></div>` : ''}<div class="text-[15px] font-black text-slate-900 leading-none">$${Number(e.amount || 0).toLocaleString()}</div></div></div>`).join('') : `<div class="py-40 text-center text-slate-300 font-black opacity-40 text-xs uppercase">尚無支出紀錄</div>`;
-                document.getElementById('total-count').innerText = `${state.expenses.length} 項紀錄`; lucide.createIcons();
-            },
+            
+                if (CONFIG.MEMBERS.includes(e.payer)) {
+                  balTWD[e.payer] += amountTWD;
+                }
+              });
+            
+              state.balances.TWD = balTWD;
+            
+              summary.innerHTML = CONFIG.MEMBERS.map(m => {
+                const spent = Math.round(totalTWD[m]);
+                const bVal = balTWD[m];
+                const color =
+                  bVal >= 5 ? 'text-green-500' :
+                  bVal <= -5 ? 'text-slate-400' :
+                  'text-slate-300';
+            
+                return `
+                  <div onclick="ui.openPersonalStats('${m}')" class="settlement-card-focus text-left">
+                    <div class="text-[10px] font-black text-slate-400 uppercase mb-2">${m}</div>
+                    <div class="text-[22px] font-black text-slate-900 leading-none mb-1">NT$${spent.toLocaleString()}</div>
+                    <div class="text-[9px] font-bold text-slate-400 mb-4">已分攤金額</div>
+                    <div class="pt-2.5 border-t border-slate-100">
+                      <div class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">TWD Balance</div>
+                      <div class="text-[11px] font-bold ${color} leading-none">
+                        ${bVal >= 5 ? '+' : ''}NT$${Math.round(bVal).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('');
+            
+              list.innerHTML = state.expenses.length
+                ? state.expenses.map(e => `
+                  <div onclick="ui.showExpenseModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="expense-card-compact text-left">
+                    <div class="flex items-center gap-3">
+                      <div class="icon-box-mini">
+                        <i data-lucide="${CONFIG.CAT_ICONS[e.category] || 'credit-card'}" style="color: ${CONFIG.CAT_COLORS[e.category]}"></i>
+                      </div>
+                      <div>
+                        <h4 class="font-black text-[14px] text-slate-800 leading-none mb-1 truncate w-32 md:w-40">${e.title || ''}</h4>
+                        <p class="text-[8px] text-slate-400 font-medium uppercase">By ${e.payer}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      ${e.image ? `<div onclick="event.stopPropagation(); ui.showExpenseImagePopup(${e.id})" class="p-2 -m-2 text-blue-600"><i data-lucide="paperclip" class="w-4.5 h-4.5"></i></div>` : ''}
+                      <div class="text-right">
+                        <div class="text-[15px] font-black text-slate-900 leading-none">
+                          ${this.formatCurrency(e.amount, e.currency || 'USD')}
+                        </div>
+                        <div class="text-[9px] text-slate-400 mt-1">
+                          折合 NT$${Math.round(this.convertToTWD(e.amount, e.currency || 'USD')).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')
+                : `<div class="py-40 text-center text-slate-300 font-black opacity-40 text-xs uppercase">尚無支出紀錄</div>`;
+            
+              document.getElementById('total-count').innerText = `${state.expenses.length} 項紀錄`;
+              lucide.createIcons();
+            }
             showExpenseImagePopup(id) {
                 const exp = state.expenses.find(e => e.id === id); if (!exp || !exp.image) return;
                 document.getElementById('td-title').innerText = exp.title || '支出憑證預覽';
-                document.getElementById('td-note').innerText = `支出項目：${exp.title}\n金額：$${exp.amount} USD\n付款人：${exp.payer}\n日期：${new Date(exp.date).toLocaleString()}`;
+                document.getElementById('td-note').innerText = `支出項目：${exp.title}\n` +`金額：${this.formatCurrency(exp.amount, exp.currency || 'USD')}\n` +`折合：NT$${Math.round(this.convertToTWD(exp.amount, exp.currency || 'USD')).toLocaleString()}\n` +`付款人：${exp.payer}\n` +`日期：${new Date(exp.date).toLocaleString()}`;
                 const area = document.getElementById('td-image-area'); const img = document.getElementById('td-image');
                 if (area && img) { area.classList.remove('hidden'); img.src = exp.image; }
                 document.getElementById('td-attach-box').classList.add('hidden');
                 this.openModal('ticket-detail-modal'); lucide.createIcons();
             },
             showSettlementAdvice() {
-                const results = []; const bal = { ...state.balances.USD };
+                const results = []; const bal = { ...state.balances.TWD };
                 const creditors = CONFIG.MEMBERS.filter(m => bal[m] > 0.05).sort((a, b) => bal[b] - bal[a]);
                 const debtors = CONFIG.MEMBERS.filter(m => bal[m] < -0.05).sort((a, b) => bal[a] - bal[b]);
                 let dIdx = 0, cIdx = 0;
                 while (dIdx < debtors.length && cIdx < creditors.length) {
                     const d = debtors[dIdx], c = creditors[cIdx]; const amt = Math.min(Math.abs(bal[d]), bal[c]);
-                    results.push({ from: d, to: c, amount: amt.toFixed(1) });
+                    results.push({ from: d, to: c, amount: Math.round(amt) });
                     bal[d] += amt; bal[c] -= amt; if (Math.abs(bal[d]) < 0.05) dIdx++; if (Math.abs(bal[c]) < 0.05) cIdx++;
                 }
                 const content = document.getElementById('settlement-advice-content');
@@ -620,7 +762,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                         </div>
                         <div class="flex-1 flex flex-col items-center">
                             <div class="text-blue-600 mb-1 opacity-80"><i data-lucide="chevrons-right" class="w-5 h-5"></i></div>
-                            <div class="text-xl font-black text-slate-900">$${r.amount}</div>
+                            <div class="text-xl font-black text-slate-900">NT$${Number(r.amount).toLocaleString()}</div>
                             <div class="w-full h-px bg-slate-100 mt-2 relative">
                                 <div class="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100 to-transparent"></div>
                             </div>
@@ -646,20 +788,70 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                 }).join('');
             },
             openPersonalStats(name) {
-                let usd = 0; let cats = {}; Object.keys(CONFIG.CAT_COLORS).forEach(c => cats[c] = 0);
-                const items = state.expenses.filter(e => e.participants?.includes(name));
-                const listHtml = items.map(e => {
-                    const share = (Number(e.amount) || 0) / (e.participants?.length || 1);
-                    usd += share; cats[e.category] = (cats[e.category] || 0) + share;
-                    return `<div class="personal-item-card shadow-sm text-left"><div class="flex items-center gap-3"><div class="icon-box-mini" style="color: ${CONFIG.CAT_COLORS[e.category]}"><i data-lucide="${CONFIG.CAT_ICONS[e.category] || 'credit-card'}"></i></div><div><h5 class="text-xs font-black text-slate-800 truncate w-32 text-left">${e.title || '未命名'}</h5><p class="text-[8px] text-slate-400 font-bold uppercase">${e.category}</p></div></div><div class="text-right"><span class="personal-item-share">$${share.toFixed(1)}</span><p class="text-[8px] text-slate-300 font-bold mt-1">Total $${e.amount}</p></div></div>`;
-                }).join('') || `<div class="py-10 text-center text-slate-300 font-bold text-xs uppercase">尚無紀錄</div>`;
-                document.getElementById('stat-totals-container').innerHTML = `<div class="text-center"><div class="text-[8px] font-black text-slate-400 uppercase mb-1">${name} 個人總支出</div><div class="text-[24px] font-black text-slate-900">NT$${Math.round(usd * CONFIG.EXCHANGE_RATE).toLocaleString()} <span class="text-[14px] font-bold text-slate-400">($${usd.toFixed(1)})</span></div></div>`;
-                document.getElementById('personal-item-list').innerHTML = listHtml;
-                const ctx = document.getElementById('personal-chart').getContext('2d'); if (state.statsChart) state.statsChart.destroy();
-                const labels = Object.keys(cats).filter(c => cats[c] > 0);
-                state.statsChart = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: labels.map(c => cats[c]), backgroundColor: labels.map(c => CONFIG.CAT_COLORS[c]), borderWidth: 0 }] }, options: { cutout: '75%', plugins: { legend: { display: false } } } });
-                this.openModal('personal-stats-modal'); lucide.createIcons();
-            },
+              let totalTWD = 0;
+              let cats = {};
+              Object.keys(CONFIG.CAT_COLORS).forEach(c => cats[c] = 0);
+            
+              const items = state.expenses.filter(e => e.participants?.includes(name));
+            
+              const listHtml = items.map(e => {
+                const amountTWD = this.convertToTWD(e.amount, e.currency || 'USD');
+                const shareTWD = amountTWD / (e.participants?.length || 1);
+            
+                totalTWD += shareTWD;
+                cats[e.category] = (cats[e.category] || 0) + shareTWD;
+            
+                return `
+                  <div class="personal-item-card shadow-sm text-left">
+                    <div class="flex items-center gap-3">
+                      <div class="icon-box-mini" style="color: ${CONFIG.CAT_COLORS[e.category]}">
+                        <i data-lucide="${CONFIG.CAT_ICONS[e.category] || 'credit-card'}"></i>
+                      </div>
+                      <div>
+                        <h5 class="text-xs font-black text-slate-800 truncate w-32 text-left">${e.title || '未命名'}</h5>
+                        <p class="text-[8px] text-slate-400 font-bold uppercase">${e.category}</p>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <span class="personal-item-share">NT$${Math.round(shareTWD).toLocaleString()}</span>
+                      <p class="text-[8px] text-slate-300 font-bold mt-1">${this.formatCurrency(e.amount, e.currency || 'USD')}</p>
+                    </div>
+                  </div>
+                `;
+              }).join('') || `<div class="py-10 text-center text-slate-300 font-bold text-xs uppercase">尚無紀錄</div>`;
+            
+              document.getElementById('stat-totals-container').innerHTML = `
+                <div class="text-center">
+                  <div class="text-[8px] font-black text-slate-400 uppercase mb-1">${name} 個人總支出</div>
+                  <div class="text-[24px] font-black text-slate-900">NT$${Math.round(totalTWD).toLocaleString()}</div>
+                </div>
+              `;
+            
+              document.getElementById('personal-item-list').innerHTML = listHtml;
+            
+              const ctx = document.getElementById('personal-chart').getContext('2d');
+              if (state.statsChart) state.statsChart.destroy();
+            
+              const labels = Object.keys(cats).filter(c => cats[c] > 0);
+              state.statsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                  labels: labels,
+                  datasets: [{
+                    data: labels.map(c => cats[c]),
+                    backgroundColor: labels.map(c => CONFIG.CAT_COLORS[c]),
+                    borderWidth: 0
+                  }]
+                },
+                options: {
+                  cutout: '75%',
+                  plugins: { legend: { display: false } }
+                }
+              });
+            
+              this.openModal('personal-stats-modal');
+              lucide.createIcons();
+            }
             updateChips() {
                 const render = (id, list, sel, single) => {
                     const el = document.getElementById(id); if (el) el.innerHTML = list.map(m => `<div onclick="ui.updateSel('${id}','${m}',${single})" class="user-chip ${sel.includes(m)?'selected':''}">${m}</div>`).join('');
@@ -697,3 +889,4 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
