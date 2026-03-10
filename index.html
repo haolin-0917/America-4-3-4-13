@@ -566,30 +566,47 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                 } catch (err) { console.error(err); ui.showStatus("上傳失敗", 1500); } finally { overlay.style.display = 'none'; }
             },
             showExpenseModal(editingExp = null) {
-                  const catEl = document.getElementById('exp-category');
-                  if (catEl) {
+                const catEl = document.getElementById('exp-category');
+                if (catEl) {
                     catEl.innerHTML =
-                      `<option value="" disabled hidden>支出類別</option>` +
-                      Object.keys(CONFIG.CAT_COLORS)
-                        .map(c => `<option value="${c}">${c}</option>`)
-                        .join('');
-                  }
-                
-                  const currencyEl = document.getElementById('exp-currency');
-                  if (currencyEl) {
+                        `<option value="" disabled hidden>支出類別</option>` +
+                        Object.keys(CONFIG.CAT_COLORS)
+                            .map(c => `<option value="${c}">${c}</option>`)
+                            .join('');
+                }
+            
+                const currencyEl = document.getElementById('exp-currency');
+                if (currencyEl) {
                     currencyEl.innerHTML = `
-                      <option value="USD">美金 USD</option>
-                      <option value="TWD">台幣 TWD</option>
+                        <option value="USD">美金 USD</option>
+                        <option value="TWD">台幣 TWD</option>
                     `;
-                  }
+                }
+            
                 state.editingExpenseId = editingExp ? editingExp.id : null;
                 state.tempImageUrl = editingExp ? editingExp.image : null;
+            
                 document.getElementById('expense-modal-title').innerText = editingExp ? '編輯支出' : '新增支出';
                 document.getElementById('exp-title').value = editingExp ? editingExp.title : '';
                 document.getElementById('exp-amount').value = editingExp ? editingExp.amount : '';
                 document.getElementById('exp-category').value = editingExp ? editingExp.category : '';
+            
+                const currentCurrency = editingExp?.currency || 'USD';
+                document.getElementById('exp-currency').value = currentCurrency;
+                state.selectedCurrency = currentCurrency;
+            
                 state.selectedPayer = editingExp ? editingExp.payer : "Zoey";
                 state.selectedParticipants = editingExp ? [...editingExp.participants] : [...CONFIG.MEMBERS];
+            
+                const amountInput = document.getElementById('exp-amount');
+                if (amountInput) {
+                    amountInput.placeholder = currentCurrency === 'TWD' ? '金額 (TWD)' : '金額 (USD)';
+                }
+            
+                document.getElementById('exp-currency').onchange = (e) => {
+                    state.selectedCurrency = e.target.value;
+                    amountInput.placeholder = e.target.value === 'TWD' ? '金額 (TWD)' : '金額 (USD)';
+                };
             
                 const r = document.getElementById('exp-image-render');
                 const x = document.getElementById('exp-remove-img');
@@ -870,6 +887,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
