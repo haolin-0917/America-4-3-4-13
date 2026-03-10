@@ -370,15 +370,41 @@
                 const title = document.getElementById('exp-title').value.trim();
                 const amount = Number(document.getElementById('exp-amount').value);
                 const category = document.getElementById('exp-category').value;
+                const currency = document.getElementById('exp-currency').value || 'USD';
+            
                 if (!title || isNaN(amount)) return;
+            
                 const old = state.expenses.find(e => e.id === state.editingExpenseId);
-                if (old && old.image && old.image !== state.tempImageUrl) logic.deleteCloudImage(old.image);
-                if (state.editingExpenseId) {
-                    state.expenses = state.expenses.map(e => e.id === state.editingExpenseId ? { ...e, title, amount, category, payer: state.selectedPayer, participants: [...state.selectedParticipants], image: state.tempImageUrl } : e);
-                } else {
-                    state.expenses.unshift({ id: Date.now(), title, amount, currency: 'USD', category, payer: state.selectedPayer, participants: [...state.selectedParticipants], date: new Date().toISOString(), image: state.tempImageUrl });
+                if (old && old.image && old.image !== state.tempImageUrl) {
+                    logic.deleteCloudImage(old.image);
                 }
-                this.saveExpenses(); ui.closeModal('expense-modal');
+            
+                const payload = {
+                    title,
+                    amount,
+                    currency,
+                    category,
+                    payer: state.selectedPayer,
+                    participants: [...state.selectedParticipants],
+                    image: state.tempImageUrl
+                };
+            
+                if (state.editingExpenseId) {
+                    state.expenses = state.expenses.map(e =>
+                        e.id === state.editingExpenseId
+                            ? { ...e, ...payload }
+                            : e
+                    );
+                } else {
+                    state.expenses.unshift({
+                        id: Date.now(),
+                        ...payload,
+                        date: new Date().toISOString()
+                    });
+                }
+            
+                this.saveExpenses();
+                ui.closeModal('expense-modal');
             },
             async deleteExpense() {
                 if (!state.editingExpenseId) return;
@@ -844,6 +870,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
