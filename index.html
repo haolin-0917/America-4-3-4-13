@@ -501,6 +501,7 @@
             },
             
             renderCategorySelector() {
+            
               const el = document.getElementById('category-selector');
               if (!el) return;
             
@@ -509,12 +510,10 @@
                   id="cat-${cat}"
                   onclick="ui.selectCategory('${cat}')"
                   class="category-chip ${state.selectedCategory === cat ? 'active' : ''}">
-                  <i data-lucide="${CONFIG.CAT_ICONS[cat] || 'credit-card'}" style="color: ${CONFIG.CAT_COLORS[cat]}"></i>
-                  <span>${cat}</span>
+                  ${cat}
                 </div>
               `).join('');
             
-              lucide.createIcons();
             },
             
             selectCategory(category) {
@@ -934,6 +933,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
