@@ -755,9 +755,8 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                         <p class="text-[8px] text-slate-400 font-medium uppercase">By ${e.payer}</p>
                       </div>
                     </div>
-                    <div class="flex items-center gap-3">
-
-                    <div class="text-right">
+                   <div class="flex items-center ml-auto">
+                    <div class="text-right mr-2">
                       <div class="text-[15px] font-black text-slate-900 leading-none">
                         ${this.formatCurrency(e.amount, e.currency || 'USD')}
                       </div>
@@ -766,12 +765,16 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                       </div>
                     </div>
                     
-                    ${e.image ? `<div onclick="event.stopPropagation(); ui.showExpenseImagePopup(${e.id})" class="p-2 -m-2 text-blue-600 flex-shrink-0">
-                    <i data-lucide="paperclip" class="w-4.5 h-4.5"></i>
-                    </div>` : ''}
+                    <div
+                      ${e.image ? `onclick="event.stopPropagation(); ui.showExpenseImagePopup(${e.id})"` : ''}
+                      class="w-7 flex justify-center flex-shrink-0">
                     
+                      ${e.image
+                        ? `<i data-lucide="paperclip" class="w-4.5 h-4.5 text-slate-400"></i>`
+                        : `<span class="w-4.5 h-4.5"></span>`
+                      }
                     </div>
-
+                    </div>
                     </div>
                   </div>
                 `).join('')
@@ -940,6 +943,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
