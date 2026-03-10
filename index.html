@@ -142,6 +142,9 @@
         .category-chip.active {background: #EBF5FF;border-color: var(--ios-blue);color: var(--ios-blue);}
         .category-chip i {width: 14px;height: 14px;}
         .icon-box-mini { width: 32px; height: 32px; border-radius: 10px; background: #F8F9FB; display: flex; align-items: center; justify-content: center; }
+          /* --- 票券附件按鈕  --- */
+        .ticket-attach-dot {width: 24px;height: 24px;border-radius: 999px;background: #F2F4F7;color: #64748B;display: flex;align-items: center;justify-content: center;cursor: pointer;transition: all 0.15s ease;}
+        .ticket-attach-dot:active {transform: scale(0.92);}
     </style>
 </head>
 <body>
@@ -587,31 +590,45 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                 }
                 this.openModal('guide-modal'); lucide.createIcons();
             },
-            renderTickets() {
-                const list = document.getElementById('ticket-list'); if(!list) return;
-                list.innerHTML = state.tickets.length ? state.tickets.map(t => `
-                <div onclick="ui.showTicketModal(${JSON.stringify(t).replace(/"/g, '&quot;')})" class="iti-main-item-card !p-4 mb-3 transition-all active:scale-[0.98] cursor-pointer">
-                    <div class="flex items-center justify-between w-full">
-                        <div class="flex items-center gap-2 min-w-0 text-left">
-                            <div class="flex flex-col min-w-0">
-                                <h4 class="font-black text-slate-900 truncate text-sm">${t.title || '未命名'}</h4>
-                                ${t.note ? `<p class="text-[10px] text-slate-400 truncate mt-0.5">${t.note}</p>` : ''}
+                renderTickets() {
+                    const list = document.getElementById('ticket-list');if (!list) return;
+                    list.innerHTML = state.tickets.length ? state.tickets.map(t => `
+                        <div onclick="ui.showTicketModal(${JSON.stringify(t).replace(/"/g, '&quot;')})"
+                             class="ticket-row-card transition-all active:scale-[0.985] cursor-pointer">
+                            <div class="ticket-row-main">
+                                <div class="ticket-row-left min-w-0">
+                                    <h4 class="ticket-row-title">${t.title || '未命名票券'}</h4>
+                                    ${t.note
+                                        ? `<p class="ticket-row-note">${t.note}</p>`
+                                        : `<p class="ticket-row-note opacity-0">placeholder</p>`
+                                    }
+                                </div>
+                                <div class="ticket-row-right">
+                                    <div class="ticket-meta-slot">
+                                        ${t.image
+                                            ? `<div onclick="event.stopPropagation(); ui.showTicketImagePopup(${t.id})" class="ticket-attach-dot">
+                                                   <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
+                                               </div>`
+                                            : `<div class="ticket-attach-dot invisible">
+                                                   <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
+                                               </div>`
+                                        }
+                                    </div>
+                
+                                    <div class="ticket-arrow-slot">
+                                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex items-center ml-auto gap-2">
-                          ${t.image ? `
-                          <div onclick="event.stopPropagation(); ui.showTicketImagePopup(${t.id})"
-                               class="p-2 text-slate-300 flex-shrink-0">
-                            <i data-lucide="paperclip" class="w-4.5 h-4.5"></i>
-                          </div>
-                          ` : ''}
-                          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                    `).join('') : `
+                        <div class="py-40 text-center text-slate-300 font-black opacity-30 text-xs tracking-widest uppercase">
+                            尚無票券
                         </div>
-                    </div>
-                </div>`).join('') : `<div class="py-40 text-center text-slate-300 font-black opacity-30 text-xs tracking-widest uppercase">尚無票券</div>`;
+                    `;
                 
-                                lucide.createIcons();
-                            },
+                    lucide.createIcons();
+                },
             showTicketImagePopup(id) {
                 const tk = state.tickets.find(t => t.id === id); if (!tk || !tk.image) return;
                 document.getElementById('td-title').innerText = tk.title || '附件圖片預覽'; document.getElementById('td-note').innerText = tk.note || '';
@@ -957,6 +974,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
