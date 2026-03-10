@@ -138,6 +138,9 @@
         .input-label { font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; padding-left: 4px; }
         .user-chip { padding: 8px 16px; border-radius: 12px; background: #F2F2F7; font-size: 12px; font-weight: 700; color: #8E8E93; cursor: pointer; transition: 0.2s; border: 1.5px solid transparent; display: inline-block; margin-right: 8px; margin-bottom: 8px; }
         .user-chip.selected { background: #EBF5FF; border-color: var(--ios-blue); color: var(--ios-blue); }
+        .category-chip {display: inline-flex;align-items: center;gap: 6px;padding: 10px 14px;border-radius: 14px;background: #F2F2F7;font-size: 12px;font-weight: 800;color: #475569;cursor: pointer;border: 1.5px solid transparent;transition: all 0.2s ease;}
+        .category-chip.active {background: #EBF5FF;border-color: var(--ios-blue);color: var(--ios-blue);}
+        .category-chip i {width: 14px;height: 14px;}
         .icon-box-mini { width: 32px; height: 32px; border-radius: 10px; background: #F8F9FB; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -284,16 +287,39 @@
             <div class="modal-content-scroll no-scrollbar text-left">
                 <div class="space-y-4">
                     <input type="text" id="exp-title" class="input-pill" placeholder="項目名稱">
-                    <select id="exp-category" class="input-pill" required></select>
-                    <select id="exp-currency" class="input-pill" required>
-                      <option value="USD">美金 USD</option>
-                      <option value="TWD">台幣 TWD</option>
-                    </select>
-<input type="number" id="exp-amount" class="input-pill" placeholder="金額" inputmode="decimal">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase block">付款人</label><div id="payer-list"></div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase mt-4 block">分攤者</label><div id="part-list"></div>
+                    <div>
+                      <label class="input-label">金額</label>
+                      <div class="relative mb-3">
+                        <span id="currency-prefix" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm z-10">US$</span>
+                        <input type="number" id="exp-amount" class="input-pill !pl-12 !mb-0" placeholder="金額 (USD)" inputmode="decimal">
+                      </div>
                     </div>
+                    
+                    <div>
+                      <label class="input-label">幣別</label>
+                      <div class="flex bg-[#F2F2F7] rounded-2xl p-1 mb-4">
+                        <div id="currency-USD" onclick="ui.selectCurrency('USD')" class="flex-1 text-center py-2.5 rounded-xl text-xs font-black cursor-pointer bg-white shadow-sm text-slate-900">
+                          USD
+                        </div>
+                        <div id="currency-TWD" onclick="ui.selectCurrency('TWD')" class="flex-1 text-center py-2.5 rounded-xl text-xs font-black cursor-pointer text-slate-400">
+                          TWD
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label class="input-label">支出類別</label>
+                      <div id="category-selector" class="flex flex-wrap gap-2 mb-4"></div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                      <label class="text-[10px] font-black text-slate-400 uppercase block">付款人</label>
+                      <div id="payer-list"></div>
+                    
+                      <label class="text-[10px] font-black text-slate-400 uppercase mt-4 block">分攤者</label>
+                      <div id="part-list"></div>
+                    </div>
+
                     
                     <div class="pt-4 border-t border-slate-100 mt-6">
                         <label class="text-[10px] font-black text-slate-400 uppercase mb-4 block">支出附件 (收據 / 截圖)</label>
@@ -334,7 +360,7 @@
             CAT_ICONS: {'交通':'car','餐飲':'utensils','小費':'dollar-sign','門票活動':'ticket','購物':'shopping-bag','邀請者':'users','其他':'credit-card','機票':'plane','住宿':'bed'}
         };
         const supabase = createClient(CONFIG.URL, CONFIG.KEY);
-        let state = { itinerary: {}, expenses: [], tickets: [], currentDay: 1, selectedPayer: "Zoey", selectedParticipants: ["Zoey", "Jess", "Zhe", "Sunny"],selectedCurrency: "USD", activeView: 'itinerary', editingExpenseId: null, editingTicketId: null, balances: {}, tempImageUrl: null, statsChart: null };
+        let state = { itinerary: {}, expenses: [], tickets: [], currentDay: 1, selectedPayer: "Zoey", selectedParticipants: ["Zoey", "Jess", "Zhe", "Sunny"],selectedCurrency: "USD",selectedCategory: "交通",activeView: 'itinerary', editingExpenseId: null, editingTicketId: null, balances: {}, tempImageUrl: null, statsChart: null };
 
         const logic = {
             async loadAll() {
@@ -367,44 +393,44 @@
                 try { await supabase.storage.from(CONFIG.BUCKET_ID).remove([fileName]); } catch (e) { console.error("Cloud delete failed:", e); }
             },
             submitExpense() {
-                const title = document.getElementById('exp-title').value.trim();
-                const amount = Number(document.getElementById('exp-amount').value);
-                const category = document.getElementById('exp-category').value;
-                const currency = document.getElementById('exp-currency').value || 'USD';
+              const title = document.getElementById('exp-title').value.trim();
+              const amount = Number(document.getElementById('exp-amount').value);
+              const category = state.selectedCategory;
+              const currency = state.selectedCurrency || 'USD';
             
-                if (!title || isNaN(amount)) return;
+              if (!title || isNaN(amount)) return;
             
-                const old = state.expenses.find(e => e.id === state.editingExpenseId);
-                if (old && old.image && old.image !== state.tempImageUrl) {
-                    logic.deleteCloudImage(old.image);
-                }
+              const old = state.expenses.find(e => e.id === state.editingExpenseId);
+              if (old && old.image && old.image !== state.tempImageUrl) {
+                logic.deleteCloudImage(old.image);
+              }
             
-                const payload = {
-                    title,
-                    amount,
-                    currency,
-                    category,
-                    payer: state.selectedPayer,
-                    participants: [...state.selectedParticipants],
-                    image: state.tempImageUrl
-                };
+              const payload = {
+                title,
+                amount,
+                currency,
+                category,
+                payer: state.selectedPayer,
+                participants: [...state.selectedParticipants],
+                image: state.tempImageUrl
+              };
             
-                if (state.editingExpenseId) {
-                    state.expenses = state.expenses.map(e =>
-                        e.id === state.editingExpenseId
-                            ? { ...e, ...payload }
-                            : e
-                    );
-                } else {
-                    state.expenses.unshift({
-                        id: Date.now(),
-                        ...payload,
-                        date: new Date().toISOString()
-                    });
-                }
+              if (state.editingExpenseId) {
+                state.expenses = state.expenses.map(e =>
+                  e.id === state.editingExpenseId
+                    ? { ...e, ...payload }
+                    : e
+                );
+              } else {
+                state.expenses.unshift({
+                  id: Date.now(),
+                  ...payload,
+                  date: new Date().toISOString()
+                });
+              }
             
-                this.saveExpenses();
-                ui.closeModal('expense-modal');
+              this.saveExpenses();
+              ui.closeModal('expense-modal');
             },
             async deleteExpense() {
                 if (!state.editingExpenseId) return;
@@ -435,18 +461,66 @@
 
         const ui = {
             convertToTWD(amount, currency) {
-                const val = Number(amount) || 0;
-                return currency === 'USD'
-                  ? val * CONFIG.EXCHANGE_RATE
-                  : val;
-              },
+              const val = Number(amount) || 0;return currency === 'USD' ? val * CONFIG.EXCHANGE_RATE : val;
+            },
             
-              formatCurrency(amount, currency) {
-                const val = Number(amount) || 0;
-                return currency === 'TWD'
-                  ? `NT$${val.toLocaleString()}`
-                  : `US$${val.toLocaleString()}`;
-              },
+            formatCurrency(amount, currency) {
+              const val = Number(amount) || 0;return currency === 'TWD' ? `NT$${val.toLocaleString()}` : `US$${val.toLocaleString()}`;
+            },
+            
+            selectCurrency(currency) {
+              state.selectedCurrency = currency;
+            
+              const usd = document.getElementById('currency-USD');
+              const twd = document.getElementById('currency-TWD');
+              const prefix = document.getElementById('currency-prefix');
+              const amountInput = document.getElementById('exp-amount');
+            
+              if (usd && twd) {
+                usd.classList.remove('bg-white', 'shadow-sm', 'text-slate-900');
+                usd.classList.add('text-slate-400');
+                twd.classList.remove('bg-white', 'shadow-sm', 'text-slate-900');
+                twd.classList.add('text-slate-400');
+            
+                if (currency === 'USD') {
+                  usd.classList.add('bg-white', 'shadow-sm', 'text-slate-900');
+                  usd.classList.remove('text-slate-400');
+                } else {
+                  twd.classList.add('bg-white', 'shadow-sm', 'text-slate-900');
+                  twd.classList.remove('text-slate-400');
+                }
+              }
+            
+              if (prefix) {
+                prefix.innerText = currency === 'TWD' ? 'NT$' : 'US$';
+              }
+            
+              if (amountInput) {
+                amountInput.placeholder = currency === 'TWD' ? '金額 (TWD)' : '金額 (USD)';
+              }
+            },
+            
+            renderCategorySelector() {
+              const el = document.getElementById('category-selector');
+              if (!el) return;
+            
+              el.innerHTML = Object.keys(CONFIG.CAT_COLORS).map(cat => `
+                <div
+                  id="cat-${cat}"
+                  onclick="ui.selectCategory('${cat}')"
+                  class="category-chip ${state.selectedCategory === cat ? 'active' : ''}">
+                  <i data-lucide="${CONFIG.CAT_ICONS[cat] || 'credit-card'}" style="color: ${CONFIG.CAT_COLORS[cat]}"></i>
+                  <span>${cat}</span>
+                </div>
+              `).join('');
+            
+              lucide.createIcons();
+            },
+            
+            selectCategory(category) {
+              state.selectedCategory = category;
+              this.renderCategorySelector();
+            },
             renderAll() { this.renderItinerary(state.currentDay); this.renderExpenses(); this.renderTickets(); this.initDatePicker(); },
             switchView(v) {
                 state.activeView = v;
@@ -566,66 +640,39 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                 } catch (err) { console.error(err); ui.showStatus("上傳失敗", 1500); } finally { overlay.style.display = 'none'; }
             },
             showExpenseModal(editingExp = null) {
-                const catEl = document.getElementById('exp-category');
-                if (catEl) {
-                    catEl.innerHTML =
-                        `<option value="" disabled hidden>支出類別</option>` +
-                        Object.keys(CONFIG.CAT_COLORS)
-                            .map(c => `<option value="${c}">${c}</option>`)
-                            .join('');
-                }
+              state.editingExpenseId = editingExp ? editingExp.id : null;
+              state.tempImageUrl = editingExp ? editingExp.image : null;
             
-                const currencyEl = document.getElementById('exp-currency');
-                if (currencyEl) {
-                    currencyEl.innerHTML = `
-                        <option value="USD">美金 USD</option>
-                        <option value="TWD">台幣 TWD</option>
-                    `;
-                }
+              document.getElementById('expense-modal-title').innerText = editingExp ? '編輯支出' : '新增支出';
+              document.getElementById('exp-title').value = editingExp ? editingExp.title : '';
+              document.getElementById('exp-amount').value = editingExp ? editingExp.amount : '';
             
-                state.editingExpenseId = editingExp ? editingExp.id : null;
-                state.tempImageUrl = editingExp ? editingExp.image : null;
+              state.selectedCategory = editingExp ? (editingExp.category || '交通') : '交通';
+              state.selectedCurrency = editingExp ? (editingExp.currency || 'USD') : 'USD';
+              state.selectedPayer = editingExp ? editingExp.payer : "Zoey";
+              state.selectedParticipants = editingExp ? [...editingExp.participants] : [...CONFIG.MEMBERS];
             
-                document.getElementById('expense-modal-title').innerText = editingExp ? '編輯支出' : '新增支出';
-                document.getElementById('exp-title').value = editingExp ? editingExp.title : '';
-                document.getElementById('exp-amount').value = editingExp ? editingExp.amount : '';
-                document.getElementById('exp-category').value = editingExp ? editingExp.category : '';
+              this.selectCurrency(state.selectedCurrency);
+              this.renderCategorySelector();
             
-                const currentCurrency = editingExp?.currency || 'USD';
-                document.getElementById('exp-currency').value = currentCurrency;
-                state.selectedCurrency = currentCurrency;
+              const r = document.getElementById('exp-image-render');
+              const x = document.getElementById('exp-remove-img');
+              const placeholder = document.getElementById('exp-upload-placeholder');
             
-                state.selectedPayer = editingExp ? editingExp.payer : "Zoey";
-                state.selectedParticipants = editingExp ? [...editingExp.participants] : [...CONFIG.MEMBERS];
+              if (state.tempImageUrl) {
+                r.src = state.tempImageUrl;
+                r.classList.remove('hidden');
+                x.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+              } else {
+                r.classList.add('hidden');
+                x.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+              }
             
-                const amountInput = document.getElementById('exp-amount');
-                if (amountInput) {
-                    amountInput.placeholder = currentCurrency === 'TWD' ? '金額 (TWD)' : '金額 (USD)';
-                }
-            
-                document.getElementById('exp-currency').onchange = (e) => {
-                    state.selectedCurrency = e.target.value;
-                    amountInput.placeholder = e.target.value === 'TWD' ? '金額 (TWD)' : '金額 (USD)';
-                };
-            
-                const r = document.getElementById('exp-image-render');
-                const x = document.getElementById('exp-remove-img');
-                const placeholder = document.getElementById('exp-upload-placeholder');
-            
-                if (state.tempImageUrl) {
-                    r.src = state.tempImageUrl;
-                    r.classList.remove('hidden');
-                    x.classList.remove('hidden');
-                    placeholder.classList.add('hidden');
-                } else {
-                    r.classList.add('hidden');
-                    x.classList.add('hidden');
-                    placeholder.classList.remove('hidden');
-                }
-            
-                document.getElementById('delete-exp-btn').style.display = editingExp ? 'block' : 'none';
-                this.updateChips();
-                this.openModal('expense-modal');
+              document.getElementById('delete-exp-btn').style.display = editingExp ? 'block' : 'none';
+              this.updateChips();
+              this.openModal('expense-modal');
             },
             clearExpenseImage(e) { e.stopPropagation(); state.tempImageUrl = null; document.getElementById('exp-image-render').classList.add('hidden'); document.getElementById('exp-remove-img').classList.add('hidden'); document.getElementById('exp-upload-placeholder').classList.remove('hidden'); document.getElementById('exp-image-input').value = ""; },
             async handleExpenseImage(e) {
@@ -887,6 +934,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
