@@ -708,7 +708,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
               }
             
               document.getElementById('delete-exp-btn').style.display = editingExp ? 'block' : 'none';
-              this.updateChips();
+              this.updateChips(!!editingExp);
               this.openModal('expense-modal');
             },
             clearExpenseImage(e) { e.stopPropagation(); state.tempImageUrl = null; document.getElementById('exp-image-render').classList.add('hidden'); document.getElementById('exp-remove-img').classList.add('hidden'); document.getElementById('exp-upload-placeholder').classList.remove('hidden'); document.getElementById('exp-image-input').value = ""; },
@@ -952,7 +952,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
               this.openModal('personal-stats-modal');
               lucide.createIcons();
             },
-            updateChips() {
+            updateChips(isEditing = false) {
                 const render = (id, list, sel, single) => {
                     const el = document.getElementById(id);
                     if (el) {
@@ -965,7 +965,9 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                     }
                 };
             
-                const payerOptions = [...CONFIG.MEMBERS, CONFIG.SETTLED_PAYER];
+                const payerOptions = isEditing
+                    ? [...CONFIG.MEMBERS, CONFIG.SETTLED_PAYER]
+                    : [...CONFIG.MEMBERS];
             
                 render('payer-list', payerOptions, [state.selectedPayer], true);
                 render('part-list', CONFIG.MEMBERS, state.selectedParticipants, false);
@@ -1001,6 +1003,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
