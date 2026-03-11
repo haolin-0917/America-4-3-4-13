@@ -621,7 +621,18 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                                                </div>`
                                         }
                                     </div>
-                
+                                
+                                    <div class="ticket-meta-slot">
+                                        ${t.attachment
+                                            ? `<a href="${t.attachment}" target="_blank" onclick="event.stopPropagation()" class="ticket-attach-dot">
+                                                   <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                                               </a>`
+                                            : `<div class="ticket-attach-dot invisible">
+                                                   <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                                               </div>`
+                                        }
+                                    </div>
+                                
                                     <div class="ticket-arrow-slot">
                                         <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
                                     </div>
@@ -1003,6 +1014,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
