@@ -972,7 +972,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                 render('payer-list', payerOptions, [state.selectedPayer], true);
                 render('part-list', CONFIG.MEMBERS, state.selectedParticipants, false);
             },
-            updateSel(id, m, single) { if(single) state.selectedPayer = m; else state.selectedParticipants.includes(m) ? state.selectedParticipants = state.selectedParticipants.filter(x=>x!==m) : state.selectedParticipants.push(m); this.updateChips(); },
+            updateSel(id, m, single) {if (single) {state.selectedPayer = m;} else {state.selectedParticipants.includes(m)? state.selectedParticipants = state.selectedParticipants.filter(x => x !== m): state.selectedParticipants.push(m);}this.updateChips(!!state.editingExpenseId);},
             switchDay(n) { state.currentDay = n; this.renderItinerary(n); this.initDatePicker(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
             openModal(id) { const m = document.getElementById(id); if (m) { m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10); } },
             closeModal(id) { const m = document.getElementById(id); if (m) { m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300); } },
@@ -1003,6 +1003,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
