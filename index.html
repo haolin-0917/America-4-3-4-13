@@ -363,6 +363,7 @@
             TICKET_ID: "ticket",
             BUCKET_ID: "Americiaimg",
             EXCHANGE_RATE: 31.8,
+            SETTLED_PAYER: "已結清",
             CURRENCIES: {
               USD: { label: '美金', symbol: 'US$' },
               TWD: { label: '台幣', symbol: 'NT$' }
@@ -739,22 +740,32 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                 totalTWD[m] = 0;
               });
             
-              state.expenses.forEach(e => {
-                const amountTWD = this.convertToTWD(e.amount, e.currency || 'USD');
-                const parts = Array.isArray(e.participants) ? e.participants : [];
-                const shareTWD = amountTWD / (parts.length || 1);
+        state.expenses.forEach(e => {
+              const amountTWD = this.convertToTWD(e.amount, e.currency || 'USD');
+              const parts = Array.isArray(e.participants) ? e.participants : [];
+              const shareTWD = amountTWD / (parts.length || 1);
+              const isSettled = e.payer === CONFIG.SETTLED_PAYER;
             
-                parts.forEach(p => {
-                  if (CONFIG.MEMBERS.includes(p)) {
-                    totalTWD[p] += shareTWD;
-                    balTWD[p] -= shareTWD;
-                  }
-                });
-            
-                if (CONFIG.MEMBERS.includes(e.payer)) {
-                  balTWD[e.payer] += amountTWD;
+              // 個人統計照算
+              parts.forEach(p => {
+                if (CONFIG.MEMBERS.includes(p)) {
+                  totalTWD[p] += shareTWD;
                 }
               });
+            
+              // 已結清：不再加入分帳 / 結清
+              if (isSettled) return;
+            
+              parts.forEach(p => {
+                if (CONFIG.MEMBERS.includes(p)) {
+                  balTWD[p] -= shareTWD;
+                }
+              });
+            
+              if (CONFIG.MEMBERS.includes(e.payer)) {
+                balTWD[e.payer] += amountTWD;
+              }
+            });
             
               state.balances.TWD = balTWD;
             
@@ -789,7 +800,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
                       </div>
                       <div>
                         <h4 class="font-black text-[14px] text-slate-800 leading-none mb-1 truncate w-32 md:w-40">${e.title || ''}</h4>
-                        <p class="text-[8px] text-slate-400 font-medium uppercase">By ${e.payer}</p>
+                        <p class="text-[8px] text-slate-400 font-medium uppercase">${e.payer === CONFIG.SETTLED_PAYER ? '已結清' : `By ${e.payer}`}</p>
                       </div>
                     </div>
                    <div class="flex items-center ml-auto gap-2">
@@ -944,9 +955,21 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
             },
             updateChips() {
                 const render = (id, list, sel, single) => {
-                    const el = document.getElementById(id); if (el) el.innerHTML = list.map(m => `<div onclick="ui.updateSel('${id}','${m}',${single})" class="user-chip ${sel.includes(m)?'selected':''}">${m}</div>`).join('');
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.innerHTML = list.map(m => `
+                            <div onclick="ui.updateSel('${id}','${m}',${single})"
+                                 class="user-chip ${sel.includes(m) ? 'selected' : ''}">
+                                ${m}
+                            </div>
+                        `).join('');
+                    }
                 };
-                render('payer-list', CONFIG.MEMBERS, [state.selectedPayer], true); render('part-list', CONFIG.MEMBERS, state.selectedParticipants, false);
+            
+                const payerOptions = [...CONFIG.MEMBERS, CONFIG.SETTLED_PAYER];
+            
+                render('payer-list', payerOptions, [state.selectedPayer], true);
+                render('part-list', CONFIG.MEMBERS, state.selectedParticipants, false);
             },
             updateSel(id, m, single) { if(single) state.selectedPayer = m; else state.selectedParticipants.includes(m) ? state.selectedParticipants = state.selectedParticipants.filter(x=>x!==m) : state.selectedParticipants.push(m); this.updateChips(); },
             switchDay(n) { state.currentDay = n; this.renderItinerary(n); this.initDatePicker(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
@@ -979,6 +1002,7 @@ ${item.location ? `<span class="flex items-center gap-1 text-[11px] text-slate-4
     </script>
 </body>
 </html>
+
 
 
 
